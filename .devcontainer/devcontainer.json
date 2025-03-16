@@ -1,0 +1,24 @@
+{
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        "[markdown]": {
+          "editor.formatOnSave": false
+        },
+        "files.insertFinalNewline": true,
+        "search.exclude": {
+          "**/node_modules/**": true
+        }
+      }
+    }
+  },
+  "dockerComposeFile": [
+    "../compose.yaml"
+  ],
+  "name": "zenn-docs",
+  "service": "workspace",
+  "workspaceFolder": "/usr/src/app"
+}
