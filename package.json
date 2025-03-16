@@ -1,0 +1,12 @@
+{
+  "name": "zenn-docs",
+  "description": "kenshuhori の zenn のスクラップや記事を管理しています",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kenshuhori/zenn-docs.git"
+  },
+  "homepage": "https://github.com/kenshuhori/zenn-docs#readme",
+  "dependencies": {
+    "zenn-cli": "^0.1.158"
+  }
+}
