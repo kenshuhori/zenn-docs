@@ -129,7 +129,7 @@ impl<T: fmt::Display + ?Sized> ToString for T {
 }
 ```
 
-なるほど `to_string` メソッドを利用したい構造体 `T` のトレイト境界に、たしかに `fmt::Display` が記載されていますね。だから `std::fmt::Display` を実装する必要があったんですね。
+なるほど `to_string` メソッドを利用したい構造体 `T` のトレイト境界に、たしかに `fmt::Display` が記載されていますね。だから `std::fmt::Display` を実装すれば自動的に `to_string` メソッドが利用できる状態になるわけか。なるほど。
 
 `to_string` メソッドは中で `spec_to_string` メソッドを呼び出していますね。
 
@@ -148,7 +148,7 @@ default fn spec_to_string(&self) -> String {
 
 なるほど `spec_to_string` メソッドの中で `fmt::Display::fmt` メソッドが呼ばれていますね。そんでもって `expect` が呼ばれています。
 
-だから `to_string` の戻り値型は `Result` ではなく、失敗するとpanicになるんですね。
+だから `to_string` の戻り値型は `Result` ではなく、かつ失敗するとpanicになるんですね。
 
 足を止めて見た甲斐がありました。
 
