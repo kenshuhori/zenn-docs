@@ -127,7 +127,7 @@ fn main() {
     let age_value = 35_u8;
     let yoshida = Person {
         nickname: String::from("yosshi-"),
-        age: age_value.into(),
+        age: age_value.into(), // 変更前: age: Age::from(age_value),
     };
     println!("{:?}", yoshida);
 }
@@ -147,6 +147,7 @@ struct Person {
 #[derive(Debug)]
 struct Age(u8);
 
+// 変更前: From<u8> for Age { ...
 impl Into<Age> for u8 {
     fn into(self) -> Age {
         Age(self)
