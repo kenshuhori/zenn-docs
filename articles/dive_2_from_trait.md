@@ -41,7 +41,7 @@ fn main() {
     let age_value = 35_u8;
     let yoshida = Person {
         nickname: String::from("yosshi-"),
-        age: Age::from(age_value),
+        age: Age::from(age_value), // mismatched types (expected Age, found u8)
     };
     println!("{:?}", yoshida);
 }
