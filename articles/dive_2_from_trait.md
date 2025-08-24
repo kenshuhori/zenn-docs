@@ -208,5 +208,5 @@ where
 
 今回書いたRustのコードはこのリポジトリで制作しています。
 
-https://github.com/kenshuhori/rust/tree/main/workspace/dive_from_trait
+https://github.com/kenshuhori/rust/tree/main/workspace/dive_2_from_trait
 
