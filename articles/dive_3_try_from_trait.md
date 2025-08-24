@@ -62,12 +62,12 @@ required for 'u8' to implement 'Into<Age>'
 required for 'Age' to implement 'TryFrom<u8>'
 
 expected struct 'Age'
-  found enum 'Result<Age, Infallibley'
+  found enum 'Result<Age, Infallible>'
 ```
 
 1つ目は `'u8' to implement 'Into<Age>'` や `'Age' to implement 'TryFrom<u8>'` から、実装が足りていないですと言われていますね。まだ実装していないので当然ですね。
 
-2つ目は、age には `Age型` が来て欲しいのだけど、`Result<Age, Infallibley>` が受け取れてしまいました、と言われていますね。
+2つ目は、age には `Age型` が来て欲しいのだけど、`Result<Age, Infallible>` が受け取れてしまいました、と言われていますね。
 それもそのはずで、`try_from` は `Result` を返すことで、型変換が失敗する可能性を表しているからですね。
 
 ## std::convert::TryFrom トレイトを実装してみる
@@ -109,7 +109,7 @@ fn main() {
     let nickname_value = "yosshi-";
     let yoshida = Person {
         nickname: String::from(nickname_value),
-        // POINT: Result<Age, Infallibley> から無理やり Age を取り出してみる
+        // POINT: Result<Age, Infallible> から無理やり Age を取り出してみる
         age: Age::try_from(age_value).expect("年齢の変換は成功するはず"),
     };
     assert_eq!(yoshida.nickname, nickname_value);
@@ -125,13 +125,20 @@ fn main() {
 
 これは[関連型](https://doc.rust-jp.rs/rust-by-example-ja/generics/assoc_items/types.html)というやつですが、今回は無視してしまいます。
 
-`Age::try_from(age_value)` は `Result` を返すため、無理やり中身の `Age型` を取り出すために `.expect("年齢の変換は成功するはず")` としてみました。
+`Age::try_from(age_value)` は `Result` を返します。無理やり中身の `Age型` を取り出すために `.expect("年齢の変換は成功するはず")` としてみました。
 
 こうして実行してみると、なんとか成功しました。
 
 ## もう一段だけ深ぼってみる #1
 
-(TODO)
+最初エラーになったメッセージの中で `Infallible` というあまり見かけないエラー型が登場しました。これは何だったのでしょうか？
+
+```rust
+expected struct 'Age'
+  found enum 'Result<Age, Infallible>'
+```
+
+`Infallible
 
 ## 振り返り
 
