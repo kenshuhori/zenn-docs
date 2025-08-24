@@ -65,8 +65,7 @@ expected struct 'Age'
   found enum 'Result<Age, Infallibley'
 ```
 
-1つ目は `'u8' to implement 'Into<Age>'` や `'Age' to implement 'TryFrom<u8>'` から、実装が足りていないですと言われていますね。
-これは、まだ実装していないので当然ですね。
+1つ目は `'u8' to implement 'Into<Age>'` や `'Age' to implement 'TryFrom<u8>'` から、実装が足りていないですと言われていますね。まだ実装していないので当然ですね。
 
 2つ目は、age には `Age型` が来て欲しいのだけど、`Result<Age, Infallibley>` が受け取れてしまいました、と言われていますね。
 それもそのはずで、`try_from` は `Result` を返すことで、型変換が失敗する可能性を表しているからですね。
@@ -91,11 +90,12 @@ enum AgeError {
     Impossible,
 }
 
+// POINT: TryFromの実装を追加する
 impl TryFrom<u8> for Age {
     type Error = AgeError;
 
-    // POINT: 実装。u8なので0以上は保証されている。
-    // 世界最高齢は122歳なので、130はあり得ないっしょ!!ということにしている。
+    // POINT: u8なので0以上は保証されている
+    // POINT: 世界最高齢は122歳なので、130超はあり得ないことにしている
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         if value > 130 {
             return Err(AgeError::Impossible);
@@ -119,7 +119,7 @@ fn main() {
 }
 ```
 
-なんとか書いてみました。年齢ということで `0歳未満` または `130歳超`はあり得ないということにしました。
+なんとか書いてみました。年齢ということで `0歳未満` または `130歳超` はあり得ないということにしました。
 
 `impl TryFrom<u8> for Age {` の次の行に `type Error = (省略)` という見慣れないものが登場しています。
 
