@@ -67,8 +67,15 @@ expected struct 'Age'
 
 1つ目は `'u8' to implement 'Into<Age>'` や `'Age' to implement 'TryFrom<u8>'` から、実装が足りていないですと言われていますね。まだ実装していないので当然ですね。
 
-2つ目は、age には `Age型` が来て欲しいのだけど、`Result<Age, Infallible>` が受け取れてしまいました、と言われていますね。
-それもそのはずで、`try_from` は `Result` を返すことで、型変換が失敗する可能性を表しているからですね。
+2つ目は、age には `Age型` が来て欲しいのだけど、`Result<Age, Infallible>` が受け取れてしまいました、と言われています。それもそのはずで、`try_from` は `Result` を返すことで、型変換が失敗する可能性を表しているからですね。
+
+ただ、まだ `impl TryFrom<u8> for Age {` を書いていないのですが、どうして `try_from` メソッドを呼び出すところまではいけているんでしょう？
+
+ちょっと自信ないですが、これも `prelude` によるものと考えています（間違ってたら教えてください）。
+単純に「`use std::convert::*` を自動でやってくれているもの」という認識だと、僕のようなつまずき方をする気がします。
+
+https://doc.rust-lang.org/std/prelude/index.html
+
 
 ## std::convert::TryFrom トレイトを実装してみる
 
@@ -138,11 +145,20 @@ expected struct 'Age'
   found enum 'Result<Age, Infallible>'
 ```
 
-`Infallible
+`Infallible` を辞書でひいてみると `誤りのない` とか `絶対に正しい` といった意味のようです。おそらく `エラーになることがない` エラーみたいな立ち位置なのではないでしょうか。
+
+公式をみると、どうやら `Result` が必ず `Ok` を返す時に指定する慣習?があるみたいですね。
+
+https://doc.rust-lang.org/std/convert/enum.Infallible.html
+
+またRustには[never型](https://doc.rust-jp.rs/book-ja/ch19-04-advanced-types.html#never%E5%9E%8B%E3%81%AF%E7%B5%B6%E5%AF%BE%E3%81%AB%E8%BF%94%E3%82%89%E3%81%AA%E3%81%84)と呼ばれる `!` という名前の特別な型がありますが、これと同じ役割と記載がありますね。
+
+`Infallible` もゆくゆくは `!` に統合されてaliasとなっていく予定があるみたいです。
+
 
 ## 振り返り
 
-(TODO)
+今回も結局[core/convert/mod.rs](https://doc.rust-lang.org/src/core/convert/mod.rs.html)まで読みにいってしまいました。徐々にですが「これはどんな条件で自動実装されるのか?」みたいな視点で、impl節をパラパラと見て回るような動きができてきた?ので、すこーしだけ成長を感じます。
 
 これで明日から、もっと堂々と `try_from` を使っていけるぞー 🙌
 
