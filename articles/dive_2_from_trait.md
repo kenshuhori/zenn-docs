@@ -3,7 +3,8 @@ title: "足を止めて見る #2 〜 RustのFromトレイト 〜"
 emoji: "🚶"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["rust"]
-published: false
+published: true
+published_at: 2025-08-28 12:00
 publication_name: doctormate
 ---
 
