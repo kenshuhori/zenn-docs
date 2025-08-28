@@ -69,10 +69,20 @@ expected struct 'Age'
 
 2つ目は、age には `Age型` が来て欲しいのだけど、`Result<Age, Infallible>` が受け取れてしまいました、と言われています。それもそのはずで、`try_from` は `Result` を返すことで、型変換が失敗する可能性を表しているからですね。
 
-ただ、まだ `impl TryFrom<u8> for Age {` を書いていないのですが、どうして `try_from` メソッドを呼び出すところまではいけているんでしょう？
+ただ、まだ `impl TryFrom<u8> for Age` を書いていないのですが、どうして `try_from` メソッドを呼び出すところまではいけているんでしょう？
 
-ちょっと自信ないですが、これも `prelude` によるものと考えています（間違ってたら教えてください）。
-単純に「`use std::convert::*` を自動でやってくれているもの」という認識だと、僕のようなつまずき方をする気がします。
+おそらくですがこれも `prelude` によるものと考えています（間違ってたら教えてください）。
+おそらく以下の順序を辿って、呼び出すことができるようになっているのでしょう。
+
+1. `prelude` により `use std::convert::{Into, From, TryFrom}` が自動でインポートされる
+2. `impl From<Age> for Age` が自動的に実装される（参考: [convert/mod.rs:774](https://doc.rust-lang.org/src/core/convert/mod.rs.html#774)）
+3. `impl Into<Age> for Age` が自動的に実装される（参考: [convert/mod.rs:757](https://doc.rust-lang.org/src/core/convert/mod.rs.html#757)）
+4. `impl TryFrom<Age> for Age` が自動的に実装される（参考: [convert/mod.rs:813](https://doc.rust-lang.org/src/core/convert/mod.rs.html#813)）
+5. `Age::try_from()` が実行でき、返り値型が `Result<Age, Infallible>` となる
+
+単純に「`use std::convert::*` を自動でやってくれているもの」という認識だと、僕のようなつまずき方をしてしまうのではないでしょうか。
+
+こうなると、prelude によって何が自動的に `impl` されるのかは、ある程度把握しておいた方が良さそうですね（頑張って足を止めて見よう...）
 
 https://doc.rust-lang.org/std/prelude/index.html
 
