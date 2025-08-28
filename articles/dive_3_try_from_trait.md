@@ -71,14 +71,13 @@ expected struct 'Age'
 
 ただ、まだ `impl TryFrom<u8> for Age` を書いていないのですが、どうして `try_from` メソッドを呼び出すところまではいけているんでしょう？
 
-おそらくですがこれも `prelude` によるものと考えています（間違ってたら教えてください）。
-おそらく以下の順序を辿って、呼び出すことができるようになっているのでしょう。
+おそらくですが `prelude` によるものと考えています（間違ってたら教えてください）。
+以下の順序を辿って、呼び出すことができるようになっているのでしょう。
 
 1. `prelude` により `use std::convert::{Into, From, TryFrom}` が自動でインポートされる
 2. `impl From<Age> for Age` が自動的に実装される（参考: [convert/mod.rs:774](https://doc.rust-lang.org/src/core/convert/mod.rs.html#774)）
 3. `impl Into<Age> for Age` が自動的に実装される（参考: [convert/mod.rs:757](https://doc.rust-lang.org/src/core/convert/mod.rs.html#757)）
 4. `impl TryFrom<Age> for Age` が自動的に実装される（参考: [convert/mod.rs:813](https://doc.rust-lang.org/src/core/convert/mod.rs.html#813)）
-5. `Age::try_from()` が実行でき、返り値型が `Result<Age, Infallible>` となる
 
 単純に「`use std::convert::*` を自動でやってくれているもの」という認識だと、僕のようなつまずき方をしてしまうのではないでしょうか。
 
