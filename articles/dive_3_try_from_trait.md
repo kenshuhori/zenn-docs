@@ -17,7 +17,7 @@ publication_name: doctormate
 
 ある型に対して、別の型から変換してその型を作る方法を定義できるのが `std::convert::From` トレイトでしたね（復習）
 
-変換に失敗するケースが考えられる場合に利用するのが `std::convert::TryFrom` トレイトです。
+変換に失敗するケースが存在する場合に利用するのが `std::convert::TryFrom` トレイトです。
 
 今回は足を止めて `std::convert::TryFrom` トレイトを実装してみます。
 
@@ -91,18 +91,18 @@ pub struct Person {
 #[derive(Debug)]
 struct Age(u8);
 
-// POINT: あり得ない（0〜130に収まらない）年齢だった場合のエラーを定義
+// POINT1: あり得ない（0〜130に収まらない）年齢だった場合のエラーを定義
 #[derive(Debug)]
 enum AgeError {
     Impossible,
 }
 
-// POINT: TryFromの実装を追加する
+// POINT2: TryFromの実装を追加する
 impl TryFrom<u8> for Age {
     type Error = AgeError;
 
-    // POINT: u8なので0以上は保証されている
-    // POINT: 世界最高齢は122歳なので、130超はあり得ないことにしている
+    // POINT3: u8なので0以上は保証されている
+    // POINT4: 世界最高齢は122歳なので、130超はあり得ないことにしている
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         if value > 130 {
             return Err(AgeError::Impossible);
@@ -116,7 +116,7 @@ fn main() {
     let nickname_value = "yosshi-";
     let yoshida = Person {
         nickname: String::from(nickname_value),
-        // POINT: Result<Age, Infallible> から無理やり Age を取り出してみる
+        // POINT5: Result<Age, Infallible> から無理やり Age を取り出してみる
         age: Age::try_from(age_value).expect("年齢の変換は成功するはず"),
     };
     assert_eq!(yoshida.nickname, nickname_value);
@@ -151,14 +151,18 @@ expected struct 'Age'
 
 https://doc.rust-lang.org/std/convert/enum.Infallible.html
 
-またRustには[never型](https://doc.rust-jp.rs/book-ja/ch19-04-advanced-types.html#never%E5%9E%8B%E3%81%AF%E7%B5%B6%E5%AF%BE%E3%81%AB%E8%BF%94%E3%82%89%E3%81%AA%E3%81%84)と呼ばれる `!` という名前の特別な型がありますが、これと同じ役割と記載がありますね。
+またRustには[never型](https://doc.rust-jp.rs/book-ja/ch19-04-advanced-types.html#never%E5%9E%8B%E3%81%AF%E7%B5%B6%E5%AF%BE%E3%81%AB%E8%BF%94%E3%82%89%E3%81%AA%E3%81%84)と呼ばれる `!` という名前の特別な型がありますが、これと同じ役割と記載があります。
 
-`Infallible` もゆくゆくは `!` に統合されてaliasとなっていく予定があるみたいです。
+```rust
+pub type Infallible = !;
+```
+
+`Infallible` もゆくゆくは `!` に統合されてaliasとなっていく予定があるようです。
 
 
 ## 振り返り
 
-今回も結局[core/convert/mod.rs](https://doc.rust-lang.org/src/core/convert/mod.rs.html)まで読みにいってしまいました。徐々にですが「これはどんな条件で自動実装されるのか?」みたいな視点で、impl節をパラパラと見て回るような動きができてきた?ので、すこーしだけ成長を感じます。
+今回も結局 [core/convert/mod.rs](https://doc.rust-lang.org/src/core/convert/mod.rs.html) まで読みにいってしまいました。徐々にですが「これはどんな条件で自動実装されるのか?」みたいな視点で、impl節をパラパラと見て回るような動きができてきた?ので、すこーしだけ成長を感じます。
 
 これで明日から、もっと堂々と `try_from` を使っていけるぞー 🙌
 
