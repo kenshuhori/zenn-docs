@@ -88,7 +88,68 @@ fn main() {
 
 なんとなく雰囲気は掴めました。
 
-## もう一段だけ深ぼってみる
+## もう一段だけ深ぼってみる #1
+
+`serde` はどのようにしてPerson構造体のデータをJSONに変換できたのでしょうか？
+
+うっすら気付いていると思いますが `#[derive(serde::Serialize)]` のおかげです。
+
+試しに `#[derive(serde::Serialize, serde::Deserialize)]` の行をコメントアウトして保存するとコンパイルエラーになり、次のようなエラーメッセージが表示されます。
+
+```
+the trait bound `Person: serde::ser::Serialize` is not satisfied
+```
+
+つまり Person構造体に `serde::ser::Serialize` を `impl` しておくれ、と怒られています。
+
+だとすると `#[derive(serde::Serialize)]` を書けば `serde::ser::Serialize` が自動的に実装されると理解できます。
+
+いつものようにソースコードを見てみます。
+
+https://docs.rs/serde_derive/1.0.219/src/serde_derive/lib.rs.html#92
+
+```rust
+#[proc_macro_derive(Serialize, attributes(serde))]
+pub fn derive_serialize(input: TokenStream) -> TokenStream {
+    let mut input = parse_macro_input!(input as DeriveInput);
+    ser::expand_derive_serialize(&mut input)
+        .unwrap_or_else(syn::Error::into_compile_error)
+        .into()
+}
+```
+
+`derive` は宣言的マクロと呼ばれているもので[TRPL19章高度な機能](https://doc.rust-jp.rs/book-ja/ch19-06-macros.html)にも紹介があります。（難しいですね）
+
+詳しいことは分かりませんが、とりあえず `ser` modの `expand_derive_serialize` 関連関数が呼ばれています。
+
+https://docs.rs/serde_derive/1.0.219/src/serde_derive/ser.rs.html#11-61
+
+```rust
+quote! {
+    #[automatically_derived]
+    impl #impl_generics #ident #ty_generics #where_clause {
+        #vis fn serialize<__S>(__self: &#remote #ty_generics, __serializer: __S) -> #serde::__private::Result<__S::Ok, __S::Error>
+        where
+            __S: #serde::Serializer,
+        {
+            #used
+            #body
+        }
+    }
+}
+```
+
+`expand_derive_serialize` 関連関数をみてみると、何やら `impl` ブロックを生成しているような記述がありました。きっとこのあたりの記述により、自動的に `serde::ser::Serialize` が実装される状態にしてくれているのでしょうね。
+
+## もう一段だけ深ぼってみる #2
+
+`cargo add serde -F derive` derive feature が追加されました。こちらは一体何なのでしょうか。
+
+もうお分かりかと思いますが、先ほどの `dervie` マクロを利用するためには、このfeatureが必要とのことです。
+
+https://docs.rs/serde/latest/serde/derive.Serialize.html
+
+今回は一旦そうなんだくらいで終わりにしようと思います。
 
 ## 振り返り
 
