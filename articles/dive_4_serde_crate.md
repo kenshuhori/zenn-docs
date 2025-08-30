@@ -43,7 +43,7 @@ serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.143"
 ```
 
-`-F derive` としたことで、serde の derive feature が追加されました。こちらについては後ほど深ぼってみます。
+`-F derive` としたことで derive という `crate feature` が追加されました。こちらについては後ほど深ぼってみます。
 
 `serde_json` というクレートも追加しています。これは `JSON` 形式を扱う場合に利用します。
 
@@ -143,7 +143,7 @@ quote! {
 
 ## もう一段だけ深ぼってみる #2
 
-`cargo add serde -F derive` derive feature が追加されました。こちらは一体何なのでしょうか。
+`cargo add serde -F derive` とすることで dervie という `crate feature` が追加されました。こちらは一体何なのでしょうか。
 
 もうお分かりかと思いますが、先ほどの `dervie` マクロを利用するためには、このfeatureが必要とのことです。
 
@@ -153,7 +153,11 @@ https://docs.rs/serde/latest/serde/derive.Serialize.html
 
 ## 振り返り
 
-これで明日から、もっと堂々と `serde` を使っていけるぞー 🙌
+今回は `serde` クレートを改めて足を止めて見てみました。
+
+これまでのシリーズと比較すると `crate feature` や `deriveマクロ` など、やっぱり難易度が一段と上がってきました。
+
+`serde` に関しては、もう少し足を止めてみた方が良さそうなので、もう何個か調べて見ようと思います。
 
 ## その他
 
