@@ -118,24 +118,28 @@ pub fn derive_serialize(input: TokenStream) -> TokenStream {
 }
 ```
 
-`derive` は宣言的マクロと呼ばれているもので[TRPL19章高度な機能](https://doc.rust-jp.rs/book-ja/ch19-06-macros.html)にも紹介があります。（難しいですね）
+`derive` は宣言的マクロと呼ばれているもので、[TRPL19章_高度な機能](https://doc.rust-jp.rs/book-ja/ch19-06-macros.html)にも紹介があります。（難しいですね）
 
 詳しいことは分かりませんが、とりあえず `ser` modの `expand_derive_serialize` 関連関数が呼ばれています。
 
 https://docs.rs/serde_derive/1.0.219/src/serde_derive/ser.rs.html#11-61
 
 ```rust
-quote! {
-    #[automatically_derived]
-    impl #impl_generics #ident #ty_generics #where_clause {
-        #vis fn serialize<__S>(__self: &#remote #ty_generics, __serializer: __S) -> #serde::__private::Result<__S::Ok, __S::Error>
-        where
-            __S: #serde::Serializer,
-        {
-            #used
-            #body
+pub fn expand_derive_serialize(input: &mut syn::DeriveInput) -> syn::Result<TokenStream> {
+    // { 途中省略 }
+    quote! {
+        #[automatically_derived]
+        impl #impl_generics #ident #ty_generics #where_clause {
+            #vis fn serialize<__S>(__self: &#remote #ty_generics, __serializer: __S) -> #serde::__private::Result<__S::Ok, __S::Error>
+            where
+                __S: #serde::Serializer,
+            {
+                #used
+                #body
+            }
         }
     }
+    // { 途中省略 }
 }
 ```
 
