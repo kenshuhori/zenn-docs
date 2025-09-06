@@ -52,7 +52,7 @@ enum E {
 
 ## serde クレートを使ってみる
 
-今回は Person という構造体を用意して、いくつか attributes を使ってみようと思います。3種類の attributes を試すために、Person 構造体のフィールドには、ユニット様構造体 `Age` をとる age フィールド、enum `Gender` をとる gender フィールドなどを用意してみました。
+今回は Person という構造体を用意して、いくつか attributes を使ってみようと思います。3種類の attributes を試すために、Person 構造体のフィールドには、構造体 `Age` をとる age フィールド、enum `Gender` をとる gender フィールドなどを用意してみました。
 
 ```rust
 #[derive(serde::Serialize)]
@@ -63,10 +63,12 @@ struct Person {
     gender: Gender,
 }
 
-#[derive(serde::Serialize, serde::Deserialize, PartialEq, Debug)]
-struct Age(u8);
+#[derive(serde::Serialize)]
+struct Age {
+    value: u8,
+}
 
-#[derive(serde::Serialize, serde::Deserialize, PartialEq, Debug)]
+#[derive(serde::Serialize)]
 enum Gender {
     Male,
     Female,
@@ -77,7 +79,7 @@ fn main() {
     let person = Person {
         first_name: String::from("太郎"),
         last_name: String::from("田中"),
-        age: Age(30),
+        age: Age { value: 30 },
         gender: Gender::Male,
     };
 
@@ -85,9 +87,10 @@ fn main() {
 
     assert_eq!(
         serialized,
-        "{\"first_name\":\"太郎\",\"last_name\":\"田中\",\"age\":30,\"gender\":\"Male\"}"
+        "{\"first_ame\":\"太郎\",\"last_ame\":\"田中\",\"age\":{\"value\":30},\"gender\":\"Male\"}"
     );
 }
+
 ```
 
 この実行は成功して、以下のJsonになります。
@@ -101,11 +104,9 @@ fn main() {
 }
 ```
 
-なるほど、ageはAge型の中の値u8が直接出力されるんですね。逆にgenderはenumのVariantが出力されるんですね。
-
 ### rename_all
 
-rename_all を使うと、以下のようにスネークケースで記述しているフィールド名をキャメルケースでシリアライズできるらしい
+rename_all を使うと、スネークケースで記述しているフィールド名をキャメルケースでシリアライズできました
 
 ```rust
 #[derive(serde::Serialize)]
@@ -124,23 +125,23 @@ struct Person {
 {
     "firstName": "太郎", // first_name -> firstName
     "lastName": "田中",  // last_name -> lastName
-    "age": 30,
+    "age": { "value": 30 },
     "gender": "Male"
 }
 ```
 
 ### rename
 
-rename を使うと、enum の `Variant` や struct の `フィールド` の名前を変更できるようです。
+rename を使うと、enum の `Variant` や struct の `フィールド` の名前を変更できました
 
 ```rust
-#[derive(serde::Serialize, serde::Deserialize, PartialEq, Debug)]
+#[derive(serde::Serialize)]
 enum Gender {
-    #[serde(rename = "男")]
+    #[serde(rename = "男")] // 追加
     Male,
-    #[serde(rename = "女")]
+    #[serde(rename = "女")] // 追加
     Female,
-    #[serde(rename = "その他")]
+    #[serde(rename = "その他")] // 追加
     Other,
 }
 ```
@@ -151,9 +152,50 @@ enum Gender {
 {
     "firstName": "太郎",
     "lastName": "田中",
-    "age": 30,
+    "age": { "value": 30 },
     "gender": "男" // Male -> 男
 }
+```
+
+### transparent
+
+transparent を使うと、フィールドを1つしか持たない構造体がネストされている時に、まるでプリミティブ型のフィールドがそこにあるかのような振る舞いができました。これは New Type パターンを想定した構造体に対して利用する狙いがあるようです。
+
+文字に起こしてもちょっと伝わりづらいので書いてみます。
+
+
+```rust
+#[derive(serde::Serialize)]
+#[serde(transparent)] // 追加
+struct Age {
+    value: u8,
+}
+```
+
+シリアライズされた Json の形
+
+```json
+{
+    "firstName": "太郎",
+    "lastName": "田中",
+    "age": 30, // { "value": 30 } -> 30
+    "gender": "男"
+}
+```
+
+わかりやすくなりました。後で試してみたのですが、もし Age がu8をとるユニット様構造体だった場合もこの形になりました。
+
+```rust
+// 以下2つのシリアライズ結果は同じになりました
+
+#[derive(serde::Serialize)]
+#[serde(transparent)]
+struct Age {
+    value: u8,
+}
+
+#[derive(serde::Serialize)]
+struct Age (u8)
 ```
 
 ## もう一段だけ深ぼってみる
