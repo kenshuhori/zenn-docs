@@ -16,9 +16,21 @@ publication_name: doctormate
 
 構造体を Json 形式にデシリアライズして、その Json 形式をしリアライズして、元の構造体に戻る様子を見ました。
 
-`serde` クレートの機能はまだまだあるので、今回も `serde` クレートを足を止めて見てみます。
+今回は `serde` クレートの `Attributes` について足を止めて見ようと思います。
 
-## xxx 使ってみる
+https://serde.rs/attributes.html
+
+## serde の attributes とは何なのか
+
+[前回](https://zenn.dev/doctormate/articles/dive_4_serde_crate)は、dervieマクロによって自動的に `serde::ser::Serialize` や `serde::de::Deserialize` が実装されることを確認しました。
+
+attributes とは、そのderiveマクロによる振る舞いを調整するための機能のようで、3種類あります。
+
+- [Container attributes](https://serde.rs/container-attrs.html)
+- [Variant attributes](https://serde.rs/variant-attrs.html)
+- [Field attributes](https://serde.rs/field-attrs.html)
+
+
 
 ## もう一段だけ深ぼってみる
 
