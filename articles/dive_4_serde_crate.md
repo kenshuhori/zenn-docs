@@ -167,5 +167,5 @@ https://docs.rs/serde/latest/serde/derive.Serialize.html
 
 今回書いたRustのコードはこのリポジトリで制作しています。
 
-https://github.com/kenshuhori/rust/tree/main/workspace/dive_4_try_from_trait
+https://github.com/kenshuhori/rust/tree/main/workspace/dive_4_serde_crate
 
