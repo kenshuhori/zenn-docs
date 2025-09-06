@@ -48,9 +48,9 @@ enum E {
 }
 ```
 
-attributes 沢山ありますね...いくつかピックアップして動作を見て見ようと思います。
+いくつかの attributes をピックアップして動作を見て見ようと思います。
 
-### rename_all (Container attributes)
+## serde クレートを使ってみる
 
 今回は Person という構造体を用意して、いくつか attributes を使ってみようと思います。3種類の attributes を試すために、Person 構造体のフィールドには、ユニット様構造体 `Age` をとる age フィールド、enum `Gender` をとる gender フィールドなどを用意してみました。
 
@@ -90,7 +90,71 @@ fn main() {
 }
 ```
 
+この実行は成功して、以下のJsonになります。
 
+```json
+{
+    "first_name": "太郎",
+    "last_name": "田中",
+    "age": 30,
+    "gender": "Male"
+}
+```
+
+なるほど、ageはAge型の中の値u8が直接出力されるんですね。逆にgenderはenumのVariantが出力されるんですね。
+
+### rename_all
+
+rename_all を使うと、以下のようにスネークケースで記述しているフィールド名をキャメルケースでシリアライズできるらしい
+
+```rust
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")] // 追加
+struct Person {
+    first_name: String,
+    last_name: String,
+    age: Age,
+    gender: Gender,
+}
+```
+
+シリアライズされた Json の形
+
+```json
+{
+    "firstName": "太郎", // first_name -> firstName
+    "lastName": "田中",  // last_name -> lastName
+    "age": 30,
+    "gender": "Male"
+}
+```
+
+### rename
+
+rename を使うと、enum の `Variant` や struct の `フィールド` の名前を変更できるようです。
+
+```rust
+#[derive(serde::Serialize, serde::Deserialize, PartialEq, Debug)]
+enum Gender {
+    #[serde(rename = "男")]
+    Male,
+    #[serde(rename = "女")]
+    Female,
+    #[serde(rename = "その他")]
+    Other,
+}
+```
+
+シリアライズされた Json の形
+
+```json
+{
+    "firstName": "太郎",
+    "lastName": "田中",
+    "age": 30,
+    "gender": "男" // Male -> 男
+}
+```
 
 ## もう一段だけ深ぼってみる
 
