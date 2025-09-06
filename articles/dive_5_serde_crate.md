@@ -200,6 +200,39 @@ struct Age (u8)
 
 ## もう一段だけ深ぼってみる
 
+そもそも `#[serde(xxx = "yyy")]` といった記述はどのようなメカニズムなのでしょうか？
+
+これを紐解くために、まずは `serde` クレートの `derive` という `crate feature` から辿ってみます。
+
+[serdeのCargo.toml](https://github.com/serde-rs/serde/blob/b4677fde9d743cb5e5951a53a79e3072b9c190d3/serde/Cargo.toml)を覗いてみます。
+
+```toml
+{{ 省略 }}
+
+[dependencies]
+serde_derive = { version = "1", optional = true, path = "../serde_derive" }
+
+{{ 省略 }}
+
+### FEATURES #################################################################
+
+[features]
+default = ["std"]
+
+# Provide derive(Serialize, Deserialize) macros.
+derive = ["serde_derive"]
+
+{{ 省略 }}
+```
+
+`derive` feature を指定するということは、この `Carto.toml` の1階層上にある `serde_derive` というディレクトリに依存するようです。
+
+この `serde_derive` ですが、[crates.io](https://crates.io/) でも検索できるように、1つの独立したクレートのようです。
+
+https://crates.io/crates/serde_derive
+
+
+
 ## 振り返り
 
 今回も `serde` クレートを改めて足を止めて見てみました。
