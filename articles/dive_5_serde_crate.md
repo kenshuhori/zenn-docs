@@ -198,9 +198,22 @@ struct Age {
 struct Age (u8)
 ```
 
-## もう一段だけ深ぼってみる
+## もう一段だけ深ぼってみる(#1)
 
-そもそも `#[serde(xxx = "yyy")]` といった記述はどのようなメカニズムなのでしょうか？
+そもそも `#[serde(xxx = "yyy")]` といった記述は何者なんでしょうか。
+
+この `#` で始まるこの記法は何て呼ぶのでしょうか？以下のように呼ぶそうです。
+
+- `#[meta]` は `Outer attribute`
+- `#![meta]` は `Inner attribute`
+
+なるほど、だからserdeも `attributes` という表現を利用していたんですね。
+
+https://doc.rust-lang.org/book/appendix-02-operators.html
+
+## もう一段だけ深ぼってみる(#2)
+
+では `#[serde(xxx = "yyy")]` はどのようなメカニズムなのでしょうか？
 
 これを紐解くために、まずは `serde` クレートの `derive` という `crate feature` から辿ってみます。
 
@@ -230,6 +243,18 @@ derive = ["serde_derive"]
 この `serde_derive` ですが、[crates.io](https://crates.io/) でも検索できるように、1つの独立したクレートのようです。
 
 https://crates.io/crates/serde_derive
+
+どうやらこのクレートにロジックがあるようです。宣言部分のソースコード [serde_derive/lib.rs](https://docs.rs/serde_derive/latest/src/serde_derive/lib.rs.html#91) をのぞいてみます。
+
+```rust
+#[proc_macro_derive(Serialize, attributes(serde))]
+pub fn derive_serialize(input: TokenStream) -> TokenStream {
+    let mut input = parse_macro_input!(input as DeriveInput);
+    ser::expand_derive_serialize(&mut input)
+        .unwrap_or_else(syn::Error::into_compile_error)
+        .into()
+}
+```
 
 
 
