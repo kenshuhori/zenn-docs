@@ -50,7 +50,7 @@ enum E {
 
 いくつかの attributes をピックアップして動作を見て見ようと思います。
 
-## serde クレートを使ってみる
+## serde クレートの attributes を使ってみる
 
 今回は Person という構造体を用意して、いくつか attributes を使ってみようと思います。3種類の attributes を試すために、Person 構造体のフィールドには、構造体 `Age` をとる age フィールド、enum `Gender` をとる gender フィールドなどを用意してみました。
 
@@ -202,14 +202,11 @@ struct Age (u8)
 
 そもそも `#[serde(xxx = "yyy")]` といった記述は何者なんでしょうか。
 
-この `#` で始まるこの記法は何て呼ぶのでしょうか？以下のように呼ぶそうです。
+これは自分知ってました、カスタムのdervieマクロってやつでしょう（違ったらごめん）
 
-- `#[meta]` は `Outer attribute`
-- `#![meta]` は `Inner attribute`
+https://doc.rust-jp.rs/book-ja/ch19-06-macros.html#%E5%B1%9E%E6%80%A7%E9%A2%A8%E3%83%9E%E3%82%AF%E3%83%AD
 
-なるほど、だからserdeも `attributes` という表現を利用していたんですね。
-
-https://doc.rust-lang.org/book/appendix-02-operators.html
+おそらく `serde` のどこかに `proc_macro_derive` といった記述があり、そこにロジックが書かれているはずです。
 
 ## もう一段だけ深ぼってみる(#2)
 
@@ -256,11 +253,21 @@ pub fn derive_serialize(input: TokenStream) -> TokenStream {
 }
 ```
 
+やりました！ `proc_macro_dervie` という記述に辿り着きました！
 
+`attributes(serde)` とあるので `#[serde]` という名前のカスタムderiveマクロになっているのでしょうね（TRPLではここまでは教えてくれなかったぞ）。
+
+細かくロジックを追いかけるのは、また今度にします。
 
 ## 振り返り
 
 今回も `serde` クレートを改めて足を止めて見てみました。
+
+attributes の使い方がざっくりですが分かりました。
+
+また `crate feature` を Cargo.toml から辿っていき、カスタムのdervieマクロの宣言まで追いかけることができたのは、Rustの習熟を深めるためにも良かったのではないでしょうか。
+
+これで明日から、もっと堂々と `serde` を使っていけるぞー 🙌
 
 ## その他
 
