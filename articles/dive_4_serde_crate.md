@@ -118,7 +118,7 @@ pub fn derive_serialize(input: TokenStream) -> TokenStream {
 }
 ```
 
-`derive` は宣言的マクロと呼ばれているもので、[TRPL19章_高度な機能](https://doc.rust-jp.rs/book-ja/ch19-06-macros.html)にも紹介があります。（難しいですね）
+`derive` は~~宣言的~~手続き的マクロと呼ばれているもので、[TRPL19章_高度な機能](https://doc.rust-jp.rs/book-ja/ch19-06-macros.html)にも紹介があります。（難しいですね）
 
 詳しいことは分かりませんが、とりあえず `ser` modの `expand_derive_serialize` 関連関数が呼ばれています。
 
