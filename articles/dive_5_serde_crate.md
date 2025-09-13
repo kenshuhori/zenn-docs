@@ -3,8 +3,8 @@ title: "足を止めて見る #5 〜 RustのSerdeクレート(2) 〜"
 emoji: "🚶"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["rust"]
-published: false
-# published_at: 2025-09-18 12:00
+published: true
+published_at: 2025-09-18 12:00
 publication_name: doctormate
 ---
 
