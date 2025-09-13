@@ -16,9 +16,23 @@ publication_name: doctormate
 
 serde の Attributes という機能を確認し、deriveマクロによって実現されている様子を確認しました。
 
-今回は、そのderiveマクロをじっくり紐解いて行こうと思います。
+今回は、その derive マクロがどのように作られているのか、追いかけながらderiveマクロについて深掘りしていこうと思います。
 
-## serde_deriveを確認
+## serde の derive マクロを追いかける
+
+前回は [serde_derive/lib.rs:#91](https://docs.rs/serde_derive/latest/src/serde_derive/lib.rs.html#91) に、dervieマクロの宣言が記述されているところまで突き止めました。
+
+```rust
+#[proc_macro_derive(Serialize, attributes(serde))]
+pub fn derive_serialize(input: TokenStream) -> TokenStream {
+    let mut input = parse_macro_input!(input as DeriveInput);
+    ser::expand_derive_serialize(&mut input)
+        .unwrap_or_else(syn::Error::into_compile_error)
+        .into()
+}
+```
+
+
 
 ## もう一段だけ深ぼってみる
 
