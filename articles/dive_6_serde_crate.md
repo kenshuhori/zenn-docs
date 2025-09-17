@@ -12,15 +12,13 @@ publication_name: doctormate
 
 足を止めて見ようシリーズの6つ目です。
 
-[前回](https://zenn.dev/doctormate/articles/dive_5_serde_crate)は serde クレートについてでした。
-
-serde の Attributes という機能を確認し、deriveマクロによって実現されている様子を確認しました。
+[前回](https://zenn.dev/doctormate/articles/dive_5_serde_crate)は serde の Attributes という機能を確認し、deriveマクロによって実現されている様子を確認しました。
 
 今回は、その derive マクロがどのように作られているのか、追いかけながらderiveマクロについて深掘りしていこうと思います。
 
 ## serde の derive マクロを追いかける
 
-前回は [serde_derive/lib.rs:#91](https://docs.rs/serde_derive/latest/src/serde_derive/lib.rs.html#91) に、dervieマクロの宣言が記述されているところまで突き止めました。
+[serde_derive/lib.rs:#91](https://docs.rs/serde_derive/latest/src/serde_derive/lib.rs.html#91) に、dervieマクロの宣言が記述されているところまで突き止めました。
 
 ```rust
 #[proc_macro_derive(Serialize, attributes(serde))]
@@ -32,15 +30,15 @@ pub fn derive_serialize(input: TokenStream) -> TokenStream {
 }
 ```
 
-`proc_macro_derive(Serialize` とあることから、構造体に `#[derive(Serialize)]` という記述を添えることでこの `derive_serialize` が実行される形になります。
+`proc_macro_derive(Serialize..` とあることから、構造体に `#[derive(Serialize)]` と記述を添えることで、この `derive_serialize` が実行される形になります。
 
-また derive マクロは追加の属性を受け取ることができ、それは `attributes(serde)` の記載で見て取れます。これにより[前回](https://zenn.dev/doctormate/articles/dive_5_serde_crate)の記事で触れた serde の `Attributes` という機能が `#[serde]` という属性を付与することで実現できているわけですね。
+また derive マクロは追加の属性を受け取ることができ、それは `attributes(serde)` の記載で見て取れます。これにより serde の `Attributes` という機能が `#[serde]` という属性を付与することで実現できているわけですね。
 
 [TRPL19章](https://doc.rust-jp.rs/book-ja/ch19-06-macros.html)にあるとおり、deriveマクロを含む手続き的マクロは、引数にTokenStream型のinputを受け取ります。
 
-通常はこのinputを `syn::parse(input).unwrap();` とするようですが、serdeでは `parse_macro_input!(input as DeriveInput);` としています。
+TRPLによると、通常このinputを `syn::parse(input).unwrap();` とするようですが、serdeでは `parse_macro_input!(input as DeriveInput);` としています。
 
-この [parse_macro_input!](https://docs.rs/syn/2.0.104/src/syn/parse_macro_input.rs.html#108-128) の実装を見てみましたが、内部的に `syn::parse` が実行されていました。`syn::parse` とするとResultが返ってくるのですが、 `parse_macro_input!` マクロではErrの場合はコンパイルエラーにしてしまうようですね。
+この [parse_macro_input!](https://docs.rs/syn/2.0.104/src/syn/parse_macro_input.rs.html#108-128) の実装を見てみましたが、内部的に `syn::parse` が実行されていました。`syn::parse` とするとResultが返ってくるのですが、 `parse_macro_input!` マクロではErrの場合はコンパイルエラーにしてしまうようです。
 
 では本題の `expand_derive_serialize` 関連関数に入っていきます。[serde_derive/ser.rs#11](https://docs.rs/serde_derive/latest/src/serde_derive/ser.rs.html#11-61)ですね。
 
