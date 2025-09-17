@@ -40,7 +40,7 @@ TRPLによると、通常このinputを `syn::parse(input).unwrap();` とする�
 
 この [parse_macro_input!](https://docs.rs/syn/2.0.104/src/syn/parse_macro_input.rs.html#108-128) の実装を見てみましたが、内部的に `syn::parse` が実行されていました。`syn::parse` とするとResultが返ってくるのですが、 `parse_macro_input!` マクロではErrの場合はコンパイルエラーにしてしまうようです。
 
-では本題の `expand_derive_serialize` 関連関数に入っていきます。[serde_derive/ser.rs#11](https://docs.rs/serde_derive/latest/src/serde_derive/ser.rs.html#11-61)ですね。
+では本題の `expand_derive_serialize` 関連関数を見ます。[serde_derive/ser.rs#11](https://docs.rs/serde_derive/latest/src/serde_derive/ser.rs.html#11-61)です。
 
 ```rust
 pub fn expand_derive_serialize(input: &mut syn::DeriveInput) -> syn::Result<TokenStream> {
