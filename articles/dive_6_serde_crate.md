@@ -200,6 +200,68 @@ where
 }
 ```
 
+`serialize_entry` ではまず `serialize_key` が呼ばれています。
+
+```rust
+fn serialize_key<T>(&mut self, key: &T) -> Result<()>
+where
+    T: ?Sized + Serialize,
+{
+    match self {
+        Compound::Map { ser, state } => {
+            tri!(ser
+                .formatter
+                .begin_object_key(&mut ser.writer, *state == State::First)
+                .map_err(Error::io));
+            *state = State::Rest;
+
+            tri!(key.serialize(MapKeySerializer { ser: *ser }));
+
+            ser.formatter
+                .end_object_key(&mut ser.writer)
+                .map_err(Error::io)
+        }
+        #[cfg(feature = "arbitrary_precision")]
+        Compound::Number { .. } => unreachable!(),
+        #[cfg(feature = "raw_value")]
+        Compound::RawValue { .. } => unreachable!(),
+    }
+}
+```
+
+なんとなく `serialize_map` メソッドと構成が似ているように見えます。一旦 `begin_object_key` と `end_object_key` を確認してみます。
+
+```rust
+/// Called before every object key.
+#[inline]
+fn begin_object_key<W>(&mut self, writer: &mut W, first: bool) -> io::Result<()>
+where
+    W: ?Sized + io::Write,
+{
+    if first {
+        Ok(())
+    } else {
+        writer.write_all(b",")
+    }
+}
+
+/// Called after every object key.  A `:` should be written to the
+/// specified writer by either this method or
+/// `begin_object_value`.
+#[inline]
+fn end_object_key<W>(&mut self, _writer: &mut W) -> io::Result<()>
+where
+    W: ?Sized + io::Write,
+{
+    Ok(())
+}
+```
+
+JSONのカンマを書き込むかどうかを判断しているようですね。1つ目のフィールドであればカンマは不要なので何もせず、2つ目以降のフィールドでは `,` がまず書き込まれるようです。 
+
+例: `{ key1: value1, key2: value2 }`
+
+`end_object_key` は何もしないようです。
 
 
 ### end の定義を確認
