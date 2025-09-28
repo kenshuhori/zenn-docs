@@ -138,19 +138,85 @@ where
 }
 ```
 
+JSONっぽい表現が現れています。`begin_object` では `{` を書き込み、`end_object` では `}` を書き込んでいます。たしかにフィールド数が0なら `{}` と書き込まれそうです。
 
+一旦最初に戻ります。つまり `serialize_struct("Person", 2)` では `{` が書き込まれるわけだ。
+
+```.rust
+// { が書き込まれる
+let mut state = serializer.serialize_struct("Person", 2)?;
+// 未確認
+state.serialize_field("nickname", &self.nickname)?;
+state.serialize_field("age", &self.age)?;
+// 未確認
+state.end()
+```
 
 ### serialize_field の定義を確認
+
+続いて `serialize_field` を確認します。
+
+`serialize_field` は `SerializeStruct` トレイトに用意されているメソッドです。
+
+serde_jsonでは、先ほどの `serialize_struct` メソッドの最後に登場した `Compound` Enum が `SerializeStruct` トレイトを実装しており、そこの `serialize_field` メソッドを確認することになります。
+
+```.rust
+fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> Result<()>
+where
+    T: ?Sized + Serialize,
+{
+    match self {
+        Compound::Map { .. } => ser::SerializeMap::serialize_entry(self, key, value),
+        #[cfg(feature = "arbitrary_precision")]
+        Compound::Number { ser, .. } => {
+            if key == crate::number::TOKEN {
+                value.serialize(NumberStrEmitter(ser))
+            } else {
+                Err(invalid_number())
+            }
+        }
+        #[cfg(feature = "raw_value")]
+        Compound::RawValue { ser, .. } => {
+            if key == crate::raw::TOKEN {
+                value.serialize(RawValueStrEmitter(ser))
+            } else {
+                Err(invalid_raw_value())
+            }
+        }
+    }
+}
+```
+
+self は `Compound::Map` となるため、`ser::SerializeMap::serialize_entry` が呼ばれることが分かります。
+
+```.rust
+fn serialize_entry<K, V>(&mut self, key: &K, value: &V) -> Result<(), Self::Error>
+where
+    K: ?Sized + Serialize,
+    V: ?Sized + Serialize,
+{
+    tri!(self.serialize_key(key));
+    self.serialize_value(value)
+}
+```
 
 
 
 ### end の定義を確認
 
-
+最後に `end` を確認します。
 
 ## もう一段だけ深ぼってみる
 
-TODO
+serialize_structメソッドの戻り値型は `SerializeStruct` 型のはずですが、`serialize_struct`の定義上は `SerializeMap` 型を返すと記載があります。
+
+さらには、serialize_structの内部で呼び出されている `serialize_map` メソッドでは `Compound::Map` が返されています。
+
+これは一体どういうことでしょうか？
+
+パッと思いあたるのは `std::convert::From` が実装されているのでは？でしょう。
+
+しかし、実際にfromが定義されている箇所は見当たりません。
 
 ## 振り返り
 
