@@ -20,7 +20,11 @@ serde の公式ドキュメントにも [Custom serialization](https://serde.rs/
 
 ## serde::ser::Serializeを自分でimplする
 
-https://serde.rs/impl-serialize.html
+[Implementing Serialize](https://serde.rs/impl-serialize.html)章を確認すると [serde data model](https://serde.rs/data-model.html) というワードが登場しています。
+
+
+
+
 
 ## もう一段だけ深ぼってみる
 
