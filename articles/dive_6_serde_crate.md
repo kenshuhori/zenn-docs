@@ -22,7 +22,7 @@ serde の公式ドキュメントにも [Custom serialization](https://serde.rs/
 
 今回もPerson構造体を用意しました。こちらを自分で実装したSerializerでJSON形式へシリアライズされることをゴールとしてやってみます。
 
-```.rust
+```rust
 struct Person {
     nickname: String,
     age: u8,
@@ -52,7 +52,7 @@ fn main() {
 
 参照のコード例を確認しつつ書いてみると、自ずと以下のようになりました。
 
-```.rust
+```rust
 impl serde::ser::Serialize for Person {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -72,7 +72,7 @@ impl serde::ser::Serialize for Person {
 
 今回は JSON 形式へシリアライズしていくため、serde_json が実装している Serializer の `serialize_struct` が呼ばれる形になります（個人的にココが地味に迷いポイントでした）
 
-```.rust
+```rust
 fn serialize_struct(self, name: &'static str, len: usize) -> Result<Self::SerializeStruct> {
     match name {
         #[cfg(feature = "arbitrary_precision")]
@@ -90,7 +90,7 @@ fn serialize_struct(self, name: &'static str, len: usize) -> Result<Self::Serial
 
 つまり `serialize_map` メソッドが内部的に呼ばれています。次はそちらを見てみます。
 
-```.rust
+```rust
 fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap> {
     tri!(self
         .formatter
@@ -116,7 +116,7 @@ fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap> {
 
 最初に `begin_object` を呼びだし、もしフィールド数が0なら `end_object` を呼び出し、戻り値として `Compound::Map` 構造体を返すようです。一旦 `begin_object` と `end_object` を確認してみます。
 
-```.rust
+```rust
 /// Called before every object.  Writes a `{` to the specified
 /// writer.
 #[inline]
@@ -142,7 +142,7 @@ JSONっぽい表現が現れています。`begin_object` では `{` を書き�
 
 一旦最初に戻ります。つまり `serialize_struct("Person", 2)` では `{` が書き込まれるわけだ。
 
-```.rust
+```rust
 // { が書き込まれる
 let mut state = serializer.serialize_struct("Person", 2)?;
 // 未確認
@@ -160,7 +160,7 @@ state.end()
 
 serde_jsonでは、先ほどの `serialize_struct` メソッドの最後に登場した `Compound` Enum が `SerializeStruct` トレイトを実装しており、そこの `serialize_field` メソッドを確認することになります。
 
-```.rust
+```rust
 fn serialize_field<T>(&mut self, key: &'static str, value: &T) -> Result<()>
 where
     T: ?Sized + Serialize,
@@ -189,7 +189,7 @@ where
 
 self は `Compound::Map` となるため、`ser::SerializeMap::serialize_entry` が呼ばれることが分かります。
 
-```.rust
+```rust
 fn serialize_entry<K, V>(&mut self, key: &K, value: &V) -> Result<(), Self::Error>
 where
     K: ?Sized + Serialize,
