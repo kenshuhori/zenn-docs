@@ -263,10 +263,155 @@ JSONのカンマを書き込むかどうかを判断しているようですね�
 
 `end_object_key` は何もしないようです。
 
+残るは `key.serialize(MapKeySerializer { ser: *ser })` です。
+
+`key` は `"nickname"`とか `"age"` などの `str` です。
+
+`serde::ser::Serializer` はRustのプリミティブ型のすべてに実装を用意しており `&str` も例外ではないです。
+
+これ以上は諦めますが、最終的には `serialize_str` が呼び出され、その中では `\"nickname\"` や `\"age\"` のように、ダブルクォーテーションをエスケープしつつ書き込んでいる様子が見えました。
+
+```rust
+#[inline]
+fn serialize_str(self, value: &str) -> Result<()> {
+    format_escaped_str(&mut self.writer, &mut self.formatter, value).map_err(Error::io)
+}
+```
+
+
+さて、`serialize_entry` の定義に戻ります。
+
+```rust
+fn serialize_entry<K, V>(&mut self, key: &K, value: &V) -> Result<(), Self::Error>
+where
+    K: ?Sized + Serialize,
+    V: ?Sized + Serialize,
+{
+    tri!(self.serialize_key(key));
+    self.serialize_value(value)
+}
+```
+
+次は `serialize_value` です。
+
+```rust
+fn serialize_value<T>(&mut self, value: &T) -> Result<()>
+where
+    T: ?Sized + Serialize,
+{
+    match self {
+        Compound::Map { ser, .. } => {
+            tri!(ser
+                .formatter
+                .begin_object_value(&mut ser.writer)
+                .map_err(Error::io));
+            tri!(value.serialize(&mut **ser));
+            ser.formatter
+                .end_object_value(&mut ser.writer)
+                .map_err(Error::io)
+        }
+        #[cfg(feature = "arbitrary_precision")]
+        Compound::Number { .. } => unreachable!(),
+        #[cfg(feature = "raw_value")]
+        Compound::RawValue { .. } => unreachable!(),
+    }
+}
+```
+
+構成は `serialize_key` とほぼ同じように見えます。一旦 `begin_object_value` と `end_object_value` を確認してみます。
+
+```rust
+/// Called before every object value.  A `:` should be written to
+/// the specified writer by either this method or
+/// `end_object_key`.
+#[inline]
+fn begin_object_value<W>(&mut self, writer: &mut W) -> io::Result<()>
+where
+    W: ?Sized + io::Write,
+{
+    writer.write_all(b":")
+}
+
+/// Called after every object value.
+#[inline]
+fn end_object_value<W>(&mut self, _writer: &mut W) -> io::Result<()>
+where
+    W: ?Sized + io::Write,
+{
+    Ok(())
+}
+```
+
+value側を書き込む際はまず `:` を書き込むようですね。`end_object_value` は何もしていません。
+
+例: `{ key1: value1, key2: value2 }`
+
+その後 `value.serialize(&mut **ser)` が呼び出されますが、こちらは key の時と同じで、`value` がどの型なのかによって変わります。`value` が構造体の場合、この記事が `Person` 構造体を例に見てきた流れがまた始まるわけです😅
+
+一旦最初に戻ります。つまり `serialize_field` では `{}` の中身が書き込まれるわけだ。
+
+```rust
+// { が書き込まれる
+let mut state = serializer.serialize_struct("Person", 2)?;
+// \"nickname\": \"タロー\" が書き込まれる
+state.serialize_field("nickname", &self.nickname)?;
+// ,\"age\": 30 が書き込まれる
+state.serialize_field("age", &self.age)?;
+// 未確認
+state.end()
+```
 
 ### end の定義を確認
 
 最後に `end` を確認します。
+
+```rust
+fn end(self) -> Result<()> {
+    match self {
+        Compound::Map { ser, state } => match state {
+            State::Empty => Ok(()),
+            _ => ser.formatter.end_object(&mut ser.writer).map_err(Error::io),
+        },
+        #[cfg(feature = "arbitrary_precision")]
+        Compound::Number { .. } => unreachable!(),
+        #[cfg(feature = "raw_value")]
+        Compound::RawValue { .. } => unreachable!(),
+    }
+}
+```
+
+self は `Compound::Map` でした。
+
+フィールド数が0のときは `State::Empty` となるため Okが返るだけのようです。
+
+フィールド数が1以上のときは `end_object` が呼び出されるようです。こちらは既に登場していました。`}`を書き込んで終わります。
+
+```rust
+/// Called after every object.  Writes a `}` to the specified
+/// writer.
+#[inline]
+fn end_object<W>(&mut self, writer: &mut W) -> io::Result<()>
+where
+    W: ?Sized + io::Write,
+{
+    writer.write_all(b"}")
+}
+```
+
+最初に戻ります。つまり `end` では `}` が書き込まれるわけだ。
+
+```rust
+// { が書き込まれる
+let mut state = serializer.serialize_struct("Person", 2)?;
+// \"nickname\":\"タロー\" が書き込まれる
+state.serialize_field("nickname", &self.nickname)?;
+// ,\"age\":30 が書き込まれる
+state.serialize_field("age", &self.age)?;
+// } が書き込まれる
+state.end()
+```
+
+つまり結果として `{\"nickname\":\"タロー\",\"age\":30}` というJSON形式にシリアライズされました。（長かった...）
 
 ## もう一段だけ深ぼってみる
 
