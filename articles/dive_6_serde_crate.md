@@ -423,13 +423,39 @@ serialize_structメソッドの戻り値型は `SerializeStruct` 型のはずで
 
 パッと思いあたるのは `std::convert::From` が実装されているのでは？でしょう。
 
-しかし、実際にfromが定義されている箇所は見当たりません。
+しかし、実際にfromが定義されている箇所は見当たりません。ではどうやって...?
+
+serde_json では、`serde::ser::Serializer` トレイトを serde_json自身が内部的に定義している `Serializer` 構造体に実装させている記載があります。
+
+```rust
+impl<'a, W, F> ser::Serializer for &'a mut Serializer<W, F>
+where
+    W: io::Write,
+    F: Formatter,
+{
+    type Ok = ();
+    type Error = Error;
+
+    type SerializeSeq = Compound<'a, W, F>;
+    type SerializeTuple = Compound<'a, W, F>;
+    type SerializeTupleStruct = Compound<'a, W, F>;
+    type SerializeTupleVariant = Compound<'a, W, F>;
+    type SerializeMap = Compound<'a, W, F>;
+    type SerializeStruct = Compound<'a, W, F>;
+    type SerializeStructVariant = Compound<'a, W, F>;
+```
+
+こちらを確認すると、`SerializeMap` も `SerializeStruct` も `Compound<'a, W, F>` で同じものであると定義されていました。
+
+なるほど、これによって `Compound::Map`型の値を返すと、戻り値型としては `SerializeMap` とも `SerializeStruct` とも書けてしまえたわけですね。
 
 ## 振り返り
 
 今回も `serde` クレートを改めて足を止めて見てみました。
 
-これで明日から、もっと堂々と `serde` を使っていけるぞー 🙌
+`serde::ser::Serizalize` の定義を追いかけるだけで大分疲れてしまいました。
+
+次は `serde::de::Deserialize` の方を追いかけてみようと思います。なんかこっちの方が難しそうです。
 
 ## その他
 
