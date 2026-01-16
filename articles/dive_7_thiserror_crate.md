@@ -140,7 +140,150 @@ pub enum Error {
 
 ## もう一段だけ深ぼってみる
 
-TODO
+ここまで `thiserror::Error` を利用して見てみましたが、仮に `std::error::Error` を使っていたらどうなっていたのか？比較してみたいと思います。
+
+```rust
+pub enum Error {
+    EmptyNickname,
+    InvalidAge(i64),
+}
+
+impl std::error::Error for Error {}
+
+pub struct Person {
+    pub nickname: String,
+    pub age: u8,
+}
+
+impl Person {
+    pub fn new(nickname: &str, age: i64) -> Result<Self, Error> {
+        if nickname.len() == 0 {
+            return Err(Error::EmptyNickname);
+        }
+        let age_u8 = u8::try_from(age).map_err(|_| Error::InvalidAge(age))?;
+
+        Ok(Self {
+            nickname: String::from(nickname),
+            age: age_u8,
+        })
+    }
+}
+```
+
+Error enum に記述していた thiserror::Error の derive マクロを外してみました。
+
+ここでひとつ、改めて気づいたんですが `Result<T,E>` の `E` って、別に `std::error::Error` を実装しているなどのクレート境界等は特に無いんですね。
+
+とはいえ、実際には `std::error::Error` が実装された構造体が指定されていた方が良いと思うので `std::error::Error` を実装してみました。すると...
+
+```sh
+`person_with_std_error::Error` doesn't implement `std::fmt::Display`
+the trait `std::fmt::Display` is not implemented for `person_with_std_error::Error`
+
+`person_with_std_error::Error` doesn't implement `Debug`
+add `#[derive(Debug)]` to `person_with_std_error::Error` or manually `impl Debug for person_with_std_error::Error`
+```
+
+`std::fmt::Display` の実装と `Debug` の実装が足りていないと怒られました。[docs.rs](https://doc.rust-lang.org/std/error/trait.Error.html) を見に行きましょう。
+
+https://doc.rust-lang.org/std/error/trait.Error.html
+
+たしかに `Debug + Display` のトレイト境界が明記されていますね。また `source` などいくつかのメソッドが提供されるようです。
+
+```rust
+pub trait Error: Debug + Display {
+    // Provided methods
+    fn source(&self) -> Option<&(dyn Error + 'static)> { ... }
+    fn description(&self) -> &str { ... }
+    fn cause(&self) -> Option<&dyn Error> { ... }
+    fn provide<'a>(&'a self, request: &mut Request<'a>) { ... }
+}
+```
+
+ちなみに、 `thiserror` の helper_attributes にも `source` というものがあり、きっと関連があるはずです。次回見てみます。
+
+言われた通り `Debug` と `Display` を実装してみました。
+
+```rust
+#[derive(Debug)]
+pub enum Error {
+    EmptyNickname,
+    InvalidAge(i64),
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Error::EmptyNickname => write!(f, "Nickname cannot be empty."),
+            Error::InvalidAge(age) => write!(f, "You provide {0}, but it must be between {min} and {max}.", age, min = u8::MIN, max = u8::MAX),
+        }
+    }
+}
+
+impl std::error::Error for Error {}
+
+pub struct Person {
+    pub nickname: String,
+    pub age: u8,
+}
+
+impl Person {
+    pub fn new(nickname: &str, age: i64) -> Result<Self, Error> {
+        if nickname.len() == 0 {
+            return Err(Error::EmptyNickname);
+        }
+        let age_u8 = u8::try_from(age).map_err(|_| Error::InvalidAge(age))?;
+
+        Ok(Self {
+            nickname: String::from(nickname),
+            age: age_u8,
+        })
+    }
+}
+```
+
+実行してみます。
+
+```rust
+fn main() {
+    let person_with_invalid_nickname = person_with_std_error::Person::new(
+        "",
+        30,
+    );
+
+    match person_with_invalid_nickname {
+        Ok(_) => {
+            println!("Person created successfully.");
+        }
+        Err(e) => {
+            println!("Error: {}", e);
+        }
+    }
+
+    let person_with_invalid_age = person_with_std_error::Person::new(
+        "Alice",
+        -50,
+    );
+
+    match person_with_invalid_age {
+        Err(e) => {
+            println!("Error: {}", e);
+        }
+        Ok(_) => {
+            println!("Person created successfully.");
+        }
+    }
+}
+
+// 出力 = Error: Nickname cannot be empty.
+// 出力 = Error: You provide -50, but it must be between 0 and 255.
+```
+
+やりました！完全に同じ出力になりました！
+
+ここまでの内容だけだと `std::fmt::Display` を自前で実装するかどうか程度の違いしかないですね。
+
+とはいえ足を止めて見た甲斐がありました。
 
 ## 振り返り
 
