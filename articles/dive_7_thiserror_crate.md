@@ -50,7 +50,7 @@ thiserror = "2.0.17"
 今回は Person という構造体を用意して new 時の引数チェック用のエラーを表現してみます。
 
 ```rust
-#[derive(thiserror::Error, Debug)]
+#[derive(thiserror::Error)]
 pub enum Error {
     #[error("Nickname cannot be empty.")]
     EmptyNickname,
