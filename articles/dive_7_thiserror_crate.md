@@ -119,9 +119,24 @@ fn main() {
 // 出力 = Error: You provide -50, but it must be between 0 and 255.
 ```
 
-意図通りに出力されました。
+意図通りに出力されたかと思います。
 
+見て分かる通り、Error enum に thiserror::Error の derive マクロを記述しています。
 
+また thiserror::Error の derive マクロの helper_attributes の1つ `error` によって、std::fmt::Display が実装されます。
+
+```rust
+#[derive(thiserror::Error)]
+pub enum Error {
+    #[error("You provide {0}, but it must be between {min} and {max}.", min = u8::MIN, max = u8::MAX)]
+    InvalidAge(i64),
+}
+```
+
+`{0}` と記述すると、ユニット様構造体である `InvalidAge(i64)` の `self.0` つまり i64 部分が表現されます。
+他にも `{min}` や `{max}` のように、任意のフォーマット引数を利用することができます。
+
+他の helper_attributes については、次回に詳しく見てみようと思います。
 
 ## もう一段だけ深ぼってみる
 
