@@ -48,7 +48,7 @@ fn main() {
 }
 ```
 
-Ageはいわゆる[ユニット様構造体](https://doc.rust-jp.rs/book-ja/ch05-01-defining-structs.html#%E3%83%95%E3%82%A3%E3%83%BC%E3%83%AB%E3%83%89%E3%81%AE%E3%81%AA%E3%81%84%E3%83%A6%E3%83%8B%E3%83%83%E3%83%88%E6%A7%98%E3%82%88%E3%81%86%E6%A7%8B%E9%80%A0%E4%BD%93)という型です。
+Ageはいわゆる[タプル構造体](https://doc.rust-jp.rs/book-ja/ch05-01-defining-structs.html#%E7%95%B0%E3%81%AA%E3%82%8B%E5%9E%8B%E3%82%92%E7%94%9F%E6%88%90%E3%81%99%E3%82%8B%E5%90%8D%E5%89%8D%E4%BB%98%E3%81%8D%E3%83%95%E3%82%A3%E3%83%BC%E3%83%AB%E3%83%89%E3%81%AE%E3%81%AA%E3%81%84%E3%82%BF%E3%83%97%E3%83%AB%E6%A7%8B%E9%80%A0%E4%BD%93%E3%82%92%E4%BD%BF%E7%94%A8%E3%81%99%E3%82%8B)という型です。
 
 無理やり実行してみると `mismatched types` エラーになってしまいます（当然ですね）。
 
