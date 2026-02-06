@@ -1,0 +1,9 @@
+title: "デファクトスタンダードなRustクレート集"
+summary: "Rustでよく使われるデファクトスタンダードなクレートをまとめました。"
+topics: ["rust"] # トピック（5つまで）
+published: false # falseだと下書き
+price: 0 # 有料の場合200〜5000
+chapters:
+  - dive_1 # チャプター1
+  - dive_2 # チャプター2
+  - dive_3 # チャプター3
