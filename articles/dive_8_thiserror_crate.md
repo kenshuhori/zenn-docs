@@ -12,7 +12,7 @@ publication_name: doctormate
 
 足を止めて見ようシリーズの8つ目です。
 
-[前回](https://zenn.dev/doctormate/articles/dive_8_thiserror_crate)の記事では thiserror の基本的な使い方を見ました。
+[前回](https://zenn.dev/doctormate/articles/dive_7_thiserror_crate)の記事では thiserror の基本的な使い方を見ました。
 
 enum に #[derive(thiserror::Error)] を付けただけで Display や Debug が自動実装されることを確認しました。
 
@@ -25,7 +25,8 @@ enum に #[derive(thiserror::Error)] を付けただけで Display や Debug が
 #[error("…")]
 
 この属性は、エラーの人間向けメッセージ（Display 出力）を定義します。
-前回の例でもすでに出てきましたが、文字列中に {} を書くことでフィールドを埋め込むことができます。
+
+[前回](https://zenn.dev/doctormate/articles/dive_7_thiserror_crate)の例でもすでに出てきましたが、文字列中に {} を書くことでフィールドを埋め込むことができます。
 
 ```rust
 #[derive(Debug, thiserror::Error)]
@@ -46,7 +47,8 @@ std::error::Error では Display が必須なので、ここを補助してく�
 この属性は 指定したエラー型への `std::convert::From` を自動生成する属性です。
 
 `std::convert::From` はこの、足を止めるシリーズの[2回目](https://zenn.dev/doctormate/articles/dive_8_thiserror_crate)でも紹介しています。
-これにより ? 演算子でエラーが変換され、上位の戻り型に適合します。
+
+（まだ私の記事では触れてないですが） `std::convert::From` が実装されているため ? 演算子でエラーを変換することができます。
 
 ```rust
 #[derive(Debug, thiserror::Error)]
@@ -64,6 +66,8 @@ fn read_file() -> Result<(), MyError> {
     Ok(())
 }
 ```
+
+重要なのは、From の実装を直接書かなくても大丈夫なところです。
 
 ---
 
@@ -100,9 +104,31 @@ pub enum MyError {
 
 このとき、MyError::Other(err) として出力すると元のエラーの文字列だけが出力されます。
 
+---
+
+#[backtrace]
+
+backtrace は nightly (Rust 1.73+) 以降で利用できるようになった attributes です。
+
+```rust
+#[derive(Debug, Error)]
+pub enum MyError {
+    #[error("failed")]
+    Fail {
+        #[backtrace]
+        bt: std::backtrace::Backtrace
+    }
+}
+```
+
+
 ## もう一段だけ深ぼってみる
 
 <!-- TODO: 記載する -->
+- helper_attributes をどこにつけるか迷う話
+- nightlyとは？
+- std::error::Error::source()とは
+- Error::provide()とは
 
 ## 振り返り
 
