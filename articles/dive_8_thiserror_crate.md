@@ -73,8 +73,9 @@ fn read_file() -> Result<String, Error> {
 元となったエラー（原因）を保持するための属性で、`source` に指定された下位のエラー型の方でエラーが発生する可能性を示唆します。
 
 ```rust
-use std::error::Error;
+use std::error::Error as _;
 
+#[derive(Debug, thiserror::Error)]
 pub enum MyError {
     #[error("パースに失敗しました")]
     InvalidFormat {
@@ -90,17 +91,15 @@ fn parse_number(s: &str) -> Result<i32, MyError> {
 
 fn main() {
     match parse_number("abc") {
-        Ok(_) => {
-            println!("パースに成功しました");
-        }
+        Ok(_) => println!("パースに成功しました"),
         Err(e) => {
             match e.source() {
-                Some(source) => println!("パースに失敗しました。根本のエラー: {}", source),
-                None => println!("パースに失敗しました。根本のエラー情報はありません"),
+                Some(source) => println!("パースに失敗しました。1つ下のエラー: {}", source),
+                None => println!("パースに失敗しました。1つ下のエラー情報はありません"),
             }
         }
     }
-    // パースに失敗しました。根本のエラー: invalid digit found in string
+    // パースに失敗しました。1つ下のエラー: invalid digit found in string
 }
 ```
 
