@@ -48,26 +48,22 @@ pub enum ExampleError {
 
 `std::convert::From` はこの、足を止めるシリーズの[2回目](https://zenn.dev/doctormate/articles/dive_8_thiserror_crate)でも紹介しています。
 
-（まだ私の記事では触れてないですが） `std::convert::From` が実装されているため ? 演算子でエラーを変換することができます。
+（まだ私の記事では触れてないですが） `std::convert::From` が実装されているため、 ? 演算子でエラーを変換することができます。
 
 ```rust
 #[derive(Debug, thiserror::Error)]
-pub enum MyError {
+pub enum Error {
     #[error("IO の問題が発生しました")]
     Io(#[from] std::io::Error),
 }
-```
 
-これがあることで、こんなコードを書くだけで済みます
-
-```rust
-fn read_file() -> Result<(), MyError> {
-    std::fs::read_to_string("foo.txt")?; // 自動で MyError に変換される
-    Ok(())
+fn read_file() -> Result<String, Error> {
+    let content = std::fs::read_to_string("nonexist.txt")?;
+    Ok(content)
 }
 ```
 
-重要なのは、From の実装を直接書かなくても大丈夫なところです。
+? 演算子により `std::io::Error` を `Error::Io` へ変換することができるため、上記のような書き方が可能になります。
 
 ---
 
