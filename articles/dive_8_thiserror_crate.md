@@ -69,19 +69,42 @@ fn read_file() -> Result<String, Error> {
 
 #[source]
 
-この属性は 元となったエラー（原因）を保持するための属性です。
-標準の std::error::Error::source() が返す値になります。
+この属性は、これまでとは異なり、何かを自動で実装する属性ではありません。
+元となったエラー（原因）を保持するための属性で、`source` に指定された下位のエラー型の方でエラーが発生する可能性を示唆します。
 
 ```rust
-#[derive(Debug, thiserror::Error)]
-pub enum ParseError {
+use std::error::Error;
+
+pub enum MyError {
     #[error("パースに失敗しました")]
     InvalidFormat {
         #[source]
         source: std::num::ParseIntError,
     },
 }
+
+fn parse_number(s: &str) -> Result<i32, MyError> {
+    s.parse::<i32>()
+        .map_err(|e| MyError::InvalidFormat { source: e })
+}
+
+fn main() {
+    match parse_number("abc") {
+        Ok(_) => {
+            println!("パースに成功しました");
+        }
+        Err(e) => {
+            match e.source() {
+                Some(source) => println!("パースに失敗しました。根本のエラー: {}", source),
+                None => println!("パースに失敗しました。根本のエラー情報はありません"),
+            }
+        }
+    }
+    // パースに失敗しました。根本のエラー: invalid digit found in string
+}
 ```
+
+上記の場合、 `e.source()` によって `std::num::ParseIntError` が導き出され、 `std::num::ParseIntError` のエラー文言である `invalid digit found in string` が出力できるようになります。
 
 ---
 
