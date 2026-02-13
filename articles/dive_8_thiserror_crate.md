@@ -24,7 +24,7 @@ enum に `#[derive(thiserror::Error)]` を付けただけで `std::fmt::Display`
 
 #[error("…")]
 
-この属性は、エラーの人間向けメッセージ（Display 出力）を定義します。
+この属性は、エラーの人間向けメッセージ `std::fmt::Display` を自動で実装する属性です。
 
 [前回](https://zenn.dev/doctormate/articles/dive_7_thiserror_crate)の例でもすでに出てきましたが、文字列中に {0} を書くことでフィールドを埋め込むこともできます。
 
@@ -38,15 +38,13 @@ pub enum ExampleError {
 }
 ```
 
-重要なのは、
-Display の実装を直接書かなくても、文字列がそのまま Display 実装になるという点です。
-std::error::Error では Display が必須なので、ここを補助してくれています。
+`std::error::Error` では `std::fmt::Display` の実装が必須なので、ここを補助してくれています。
 
 ---
 
 #[from]
 
-この属性は 指定したエラー型への `std::convert::From` を自動生成する属性です。
+この属性は、指定したエラー型への `std::convert::From` を自動で実装する属性です。
 
 `std::convert::From` はこの、足を止めるシリーズの[2回目](https://zenn.dev/doctormate/articles/dive_8_thiserror_crate)でも紹介しています。
 
