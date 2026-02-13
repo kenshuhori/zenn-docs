@@ -14,7 +14,7 @@ publication_name: doctormate
 
 [前回](https://zenn.dev/doctormate/articles/dive_7_thiserror_crate)の記事では thiserror の基本的な使い方を見ました。
 
-enum に #[derive(thiserror::Error)] を付けただけで Display や Debug が自動実装されることを確認しました。
+enum に `#[derive(thiserror::Error)]` を付けただけで `std::fmt::Display` や `std::fmt::Debug` が自動実装されることを確認しました。
 
 しかし実際のコードでは、ただ単にエラー型を定義するだけではなく「ちゃんと情報を渡したい」「原因を保持したい」 といった要件が出てきます。
 
@@ -26,13 +26,15 @@ enum に #[derive(thiserror::Error)] を付けただけで Display や Debug が
 
 この属性は、エラーの人間向けメッセージ（Display 出力）を定義します。
 
-[前回](https://zenn.dev/doctormate/articles/dive_7_thiserror_crate)の例でもすでに出てきましたが、文字列中に {} を書くことでフィールドを埋め込むことができます。
+[前回](https://zenn.dev/doctormate/articles/dive_7_thiserror_crate)の例でもすでに出てきましたが、文字列中に {0} を書くことでフィールドを埋め込むこともできます。
 
 ```rust
 #[derive(Debug, thiserror::Error)]
 pub enum ExampleError {
     #[error("指定した名前が空です")]
     EmptyName,
+    #[error("指定した年齢は{0}ですが{min}から{max}の間でなければなりません。", min = u8::MIN, max = u8::MAX)]
+    InvalidAge(i64),
 }
 ```
 
