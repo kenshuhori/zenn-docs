@@ -142,18 +142,9 @@ fn main() {
 
 #[backtrace]
 
-backtrace は nightly (Rust 1.73+) 以降で利用できるようになった attributes です。
-
-```rust
-#[derive(Debug, Error)]
-pub enum MyError {
-    #[error("failed")]
-    Fail {
-        #[backtrace]
-        bt: std::backtrace::Backtrace
-    }
-}
-```
+backtrace は nightly (Rust 1.73+) 以降で利用できる attributes です。
+下位のエラーが持つ追加情報を `provide` メソッドを通して利用できるようになりますが、
+直接利用することはないと思うので、今回は触れずに終わろうと思います。
 
 
 ## もう一段だけ深ぼってみる
