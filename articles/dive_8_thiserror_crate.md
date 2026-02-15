@@ -109,18 +109,34 @@ fn main() {
 
 #[error(transparent)]
 
-transparent は 元のエラーの Display をそのまま使いたいときに便利です。
-内部エラーを隠さずそのまま表示したい、というケースに使います
+この属性は、`source` と同様に、内部に持つ下位エラーに対する属性です。
+下位エラーの Display 実装をそのまま使いたいときに便利で、内部エラーを隠さずそのまま表示したい、というケースに使います。
+
 
 ```rust
 #[derive(Debug, thiserror::Error)]
 pub enum MyError {
     #[error(transparent)]
-    Other(#[from] anyhow::Error),
+    InvalidFormatForTransparent(#[from] std::num::ParseIntError),
+}
+
+fn parse_number_for_transparent(s: &str) -> Result<i32, MyError> {
+    s.parse::<i32>()
+        .map_err(MyError::InvalidFormatForTransparent)
+}
+
+fn main() {
+    match parse_number_for_transparent("abc") {
+        Ok(_) => println!("パースに成功しました"),
+        Err(e) => {
+            println!("パースに失敗しました。原因: {}", e);
+        }
+    }
+    // パースに失敗しました。原因: invalid digit found in string
 }
 ```
 
-このとき、MyError::Other(err) として出力すると元のエラーの文字列だけが出力されます。
+`source` と同様の `invalid digit found in string` というエラーメッセージが、`transparent` を利用すれば下位のエラーを辿ることなく `Display` されることが見て取れます。
 
 ---
 
