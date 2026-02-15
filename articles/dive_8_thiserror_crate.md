@@ -159,7 +159,7 @@ backtrace は nightly (Rust 1.73+) 以降で利用できる attributes です。
 
 ## もう一段だけ深ぼってみる
 
-thiserror が提供する主な helper attributes を、「何をしてくれるのか」「いつ使うのか」という観点で整理します。
+thiserror が提供する `helper attributes` を、「何をしてくれるのか」という観点で整理します。
 
 | 属性 | 主な役割 | `?` 変換可能か | Display への影響 |
 |------|----------|------------------|-----------------|
@@ -173,6 +173,13 @@ thiserror が提供する主な helper attributes を、「何をしてくれる
 
 ## 振り返り
 
+いかがでしょうか。
+
+自分自身は、thiserrorについてかなり理解が深まりましたし、それぞれの `helper_attributes` に対する整理もできてきたと思います。
+
+`#[error("...")]` は必須で利用するとして、原因となるエラーが存在する場合は `#[from]` と `#[error(transparent)]` を同時に利用する形が一般的なのかなと思っています。
+
+この辺りはいずれ、ロギングをサポートするRustのフレームワーク [tracing](https://docs.rs/tracing/latest/tracing/) クレートにも話を繋げていけたらと思っています。
 
 ## その他
 
