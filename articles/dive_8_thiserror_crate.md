@@ -18,7 +18,15 @@ enum に `#[derive(thiserror::Error)]` を付けただけで `std::fmt::Display`
 
 しかし実際のコードでは、ただ単にエラー型を定義するだけではなく「ちゃんと情報を渡したい」「原因を保持したい」 といった要件が出てきます。
 
-その要求を満たすために thiserror にはいくつかの `helper attributes` が用意されています。ここではそれらをひとつずつ見ていきます。
+その要求を満たすために `thiserror` にはいくつかの `helper attributes` が用意されています。
+
+この記事では `thiserror` が提供する `helper attributes` を、1つずつ実際のコードで確認しながら、
+
+- どの属性が何をするのか
+- いつ使うべきか
+- 互いの違い
+
+を整理していきます。
 
 ## thiserror クレートの attributes をひとつずつ紐解いてみる
 
