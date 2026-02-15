@@ -144,7 +144,9 @@ fn main() {
 }
 ```
 
-`source` と同様の `invalid digit found in string` というエラーメッセージが、`transparent` を利用すれば下位のエラーを辿ることなく `Display` されることが見て取れます。
+`source` と同様の `invalid digit found in string` というエラーメッセージが表示されました。
+
+`transparent` を利用すれば、わざわざ.`source()`メソッドを利用して下位のエラーを辿ることなく `Display` できることが見て取れます。
 
 ---
 
@@ -159,15 +161,15 @@ backtrace は nightly (Rust 1.73+) 以降で利用できる attributes です。
 
 thiserror が提供する主な helper attributes を、「何をしてくれるのか」「いつ使うのか」という観点で整理します。
 
-| 属性 | 主な役割 | `?` 変換 | `source()` に影響 | Display への影響 | 主な用途 |
-|------|----------|---------|------------------|-----------------|----------|
-| `#[error("...")]` | Display 実装を生成 | ❌ | ❌ | ✔（メッセージを定義） | エラー表示メッセージの定義 |
-| `#[from]` | `From<T>` 実装を生成 | ✔ | ✔（自動で source） | ❌ | 下位エラーをそのまま変換 |
-| `#[source]` | 原因エラーとして登録 | ❌ | ✔ | ❌ | 追加情報を持つラップ |
-| `#[error(transparent)]` | Display / source を透過 | ❌（※） | ✔ | ✔（下位をそのまま表示） | ラッパーエラー |
-| `#[backtrace]` | Backtrace を共有 | ❌ | ❌ | ❌ | Backtrace 提供（nightly） |
+| 属性 | 主な役割 | `?` 変換可能か | Display への影響 |
+|------|----------|------------------|-----------------|
+| `#[error("...")]` | エラー表示メッセージの定義 | ❌ | ✔（メッセージを定義） |
+| `#[from]` | `From<T>` 実装を生成 | ✔ | ❌ |
+| `#[source]` | 原因エラーの登録 | ❌ | ❌ |
+| `#[error(transparent)]` | 原因エラーの Display を透過利用 | ❌（※） | ✔（下位エラーのメッセージをそのまま表示） |
+| `#[backtrace]` | Backtrace を共有（nightly） | ❌ | ❌ |
 
-※ `transparent` は `#[from]` と併用すると `?` が使える
+※ `transparent` は `#[from]` を併用すると `?` が使える
 
 ## 振り返り
 
