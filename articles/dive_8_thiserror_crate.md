@@ -157,11 +157,17 @@ backtrace は nightly (Rust 1.73+) 以降で利用できる attributes です。
 
 ## もう一段だけ深ぼってみる
 
-<!-- TODO: 記載する -->
-- helper_attributes をどこにつけるか迷う話
-- nightlyとは？
-- std::error::Error::source()とは
-- Error::provide()とは
+thiserror が提供する主な helper attributes を、「何をしてくれるのか」「いつ使うのか」という観点で整理します。
+
+| 属性 | 主な役割 | `?` 変換 | `source()` に影響 | Display への影響 | 主な用途 |
+|------|----------|---------|------------------|-----------------|----------|
+| `#[error("...")]` | Display 実装を生成 | ❌ | ❌ | ✔（メッセージを定義） | エラー表示メッセージの定義 |
+| `#[from]` | `From<T>` 実装を生成 | ✔ | ✔（自動で source） | ❌ | 下位エラーをそのまま変換 |
+| `#[source]` | 原因エラーとして登録 | ❌ | ✔ | ❌ | 追加情報を持つラップ |
+| `#[error(transparent)]` | Display / source を透過 | ❌（※） | ✔ | ✔（下位をそのまま表示） | ラッパーエラー |
+| `#[backtrace]` | Backtrace を共有 | ❌ | ❌ | ❌ | Backtrace 提供（nightly） |
+
+※ `transparent` は `#[from]` と併用すると `?` が使える
 
 ## 振り返り
 
