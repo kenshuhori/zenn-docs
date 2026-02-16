@@ -113,6 +113,10 @@ fn main() {
 
 上記の場合、 `e.source()` によって `std::num::ParseIntError` が導き出され、 `std::num::ParseIntError` のエラー文言である `invalid digit found in string` が出力できるようになります。
 
+`e.source()` メソッドですが、これは [std::error::Errorトレイト](https://doc.rust-lang.org/std/error/trait.Error.html) が持つメソッドで、エラーの原因となる情報を提供するものです。
+
+`#[source]` は 原因となるエラーを `source()` メソッドを利用して示すプロパティということなのでしょうね。
+
 ---
 
 #[error(transparent)]
@@ -146,7 +150,7 @@ fn main() {
 
 `source` と同様の `invalid digit found in string` というエラーメッセージが表示されました。
 
-`transparent` を利用すれば、わざわざ.`source()`メソッドを利用して下位のエラーを辿ることなく `Display` できることが見て取れます。
+`transparent` を利用すれば、わざわざ `source()`メソッドを利用して下位のエラーを辿ることなく `Display` できることが見て取れます。
 
 ---
 
