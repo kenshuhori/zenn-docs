@@ -12,15 +12,51 @@ publication_name: doctormate
 
 足を止めて見ようシリーズの9つ目です。
 
-[前回](https://zenn.dev/doctormate/articles/dive_8_thiserror_crate)の記事では thiserror の helper attributes をそれぞれ確認しました。
+[前回](https://zenn.dev/doctormate/articles/dive_8_thiserror_crate)の記事では `thiserror` の `helper attributes` をそれぞれ確認し、カスタムエラー型を定義する方法を見てきました。
 
-今回は thiserror から離れて anyhow に行こうと思います。
+`thiserror` は、エラー型を定義する際にとても便利なクレートです。
 
-## thiserror クレートとは
+一方で、アプリケーションコードでは「エラー型を厳密に定義するよりも、柔軟に扱いたい」という場面も多くあります。
 
-## thiserror クレートをインストール
+そのような場合に便利なのが `anyhow` クレートです。
 
-## thiserror クレートを使ってみる
+## anyhow クレートとは
+
+`anyhow` は、アプリケーションコードでのエラーハンドリングを簡潔に書くためのクレートで、`Result<T, E>` の `E` を具体的な型ではなく `anyhow::Error` にまとめて扱うことができます。
+
+## anyhow クレートをインストール
+
+まずはインストールですね。
+
+```console
+$ cargo add anyhow
+```
+
+以下のようなメッセージが表示されながら追加されます。
+`anyhow` には `std` と `backtrace` というフィーチャーがあり、デフォルトでは `std` が有効になるようですね。
+
+```console
+$ cargo add anyhow
+    Updating crates.io index
+      Adding anyhow v1.0.102 to dependencies
+             Features:
+             + std
+             - backtrace
+    Updating crates.io index
+     Locking 1 package to latest Rust 1.89.0 compatible version
+      Adding anyhow v1.0.102
+```
+
+`Cargo.toml` に以下の依存関係が追加されました。
+
+```toml
+[dependencies]
+anyhow = "1.0.102"
+```
+
+準備はたったこれだけですね
+
+## anyhow クレートを使ってみる
 
 ## もう一段だけ深ぼってみる
 
