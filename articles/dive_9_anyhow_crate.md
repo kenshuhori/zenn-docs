@@ -14,19 +14,33 @@ publication_name: doctormate
 
 [前回](https://zenn.dev/doctormate/articles/dive_8_thiserror_crate)の記事では `thiserror` の `helper attributes` をそれぞれ確認し、カスタムエラー型を定義する方法を見てきました。
 
-`thiserror` は、エラー型を定義する際にとても便利なクレートでした。
+`thiserror` はライブラリ側でエラー型を定義する際にとても便利なクレートでした。
 
-一方で、アプリケーションコードでは「エラー型を厳密に定義する」こともあるますが「柔軟に扱いたい」という場面も多くあります。
+一方で、アプリケーションコードでは「エラー型を厳密に定義する」よりも「柔軟に扱いたい」という場面も多くあります。
 
 そのような場合に便利なのが `anyhow` クレートです。
 
+今回は `anyhow` クレートを改めて足を止めて見てみます。
+
 ## anyhow クレートとは
 
-`anyhow` は、アプリケーションコードでのエラーハンドリングを簡潔に書くためのクレートで、`Result<T, E>` の `E` を具体的な型ではなく `anyhow::Error` にまとめて扱うことができます。
+`anyhow` は、アプリケーションコードでのエラーハンドリングを簡潔に書くためのクレートです。
+
+Rustでは通常、関数の戻り値として次のような型を返します。
+
+```rust
+Result<T, E>
+```
+
+ここで E はエラー型です。
+
+ライブラリを書く場合は、thiserror を使って独自のエラー型を定義することがよくあります。しかしアプリケーションコードでは、エラー型を細かく定義するよりも「とりあえずエラーとして扱いたい」ということも多くあります。
+
+anyhow を使うと、この E を anyhow::Error にまとめて扱うことができます。
 
 ## anyhow クレートをインストール
 
-まずはインストールですね。
+まずは anyhow をインストールします。
 
 ```console
 $ cargo add anyhow
@@ -40,19 +54,18 @@ $ cargo add anyhow
       Adding anyhow v1.0.102
 ```
 
-上記のようなメッセージが表示されながら追加されます。
-`anyhow` には `std` と `backtrace` というフィーチャーがあり、デフォルトでは `std` が有効になるようです。
-
-`Cargo.toml` に以下の依存関係が追加されました。
+すると Cargo.toml に次の依存関係が追加されます。
 
 ```toml
 [dependencies]
 anyhow = "1.0.102"
 ```
 
+anyhow には std と backtrace という feature があり、デフォルトでは std が有効になります。
+
 ## anyhow クレートを使ってみる
 
-ごく普通に使ってみます。
+簡単な例を書いてみます。
 
 ```rust
 fn main() {
@@ -68,11 +81,27 @@ fn read_file() -> anyhow::Result<String> {
 }
 ```
 
-## もう一段だけ深ぼってみる(1)
+ここで read_file の戻り値に注目してみます。
+
+```rust
+anyhow::Result<String>
+```
+
+これは実際には次の型のエイリアスです。
+
+```rust
+std::result::Result<String, anyhow::Error>
+```
+
+つまり `anyhow::Result<T>` は `Result<T, anyhow::Error>` を簡潔に書くための型エイリアスになっています。
+
+## もう一段だけ深ぼってみる (1)
+
+さて、ここで改めて ? 演算子について考えてみます。
 
 すっかり使い慣れた `?`演算子（question mark operator）ですが、これってそもそも何なのでしょうか？
 
-先ほどのコード例を、もう少し分解してみます。
+先ほどのコードを少し分解してみます。
 
 ```rust
 fn main() {
@@ -82,7 +111,6 @@ fn main() {
     }
 }
 
-// ? 演算子は std::result::Result<T,E> を T に変換しているっぽい
 fn read_file_ext() -> anyhow::Result<String> {
     let file = read_file()?;
     Ok(file)
@@ -93,28 +121,46 @@ fn read_file() -> std::result::Result<String, std::io::Error> {
 }
 ```
 
-つまり `?`演算子は `std::result::Result<T,E>` を `T` に変換してくれるように見えます。
+ここでは `read_file()?` という形で ? 演算子を使っています。
 
-`?`演算子については、TRPLの `9.2. Resultで回復可能なエラー` でも紹介されています。
+これは概念的には次のような処理になります。
 
-https://doc.rust-jp.rs/book-ja/ch09-02-recoverable-errors-with-result.html#%E3%82%A8%E3%83%A9%E3%83%BC%E5%A7%94%E8%AD%B2%E3%81%AE%E3%82%B7%E3%83%A7%E3%83%BC%E3%83%88%E3%82%AB%E3%83%83%E3%83%88-%E6%BC%94%E7%AE%97%E5%AD%90
+```rust
+match read_file() {
+    Ok(v) => v,
+    Err(e) => return Err(From::from(e)),
+}
+```
 
-> Resultの値がOkなら、Okの中身がこの式から返ってきて、プログラムは継続します。
-> 値がErrなら、 returnキーワードを使ったかのように関数全体からErrが返ってくる
+つまり ? 演算子は
 
-つまり `?`演算子は `std::result::Result<T,E>` がOkなら `T` を返し、Errなら `return Err` する、がもう一歩正しい理解のようです。
+- Ok の場合 → 中身を取り出す
+- Err の場合 → return Err(...) する
 
-次に `?`演算子の実装はどこに書いてあるのか見つけにいきたいと思います。
+という処理を簡潔に書くための構文です。
 
-ここで、探せども中々わからず、色々と調べた結果、Rust の RFC1859-try-trait に辿り着きました。
+この挙動は、TRPL（The Rust Programming Language）の
+「9.2 Resultで回復可能なエラー」でも説明されています。
 
-https://rust-lang.github.io/rfcs/1859-try-trait.html?utm_source=chatgpt.com
+https://doc.rust-jp.rs/book-ja/ch09-02-recoverable-errors-with-result.html
 
-つまり、`?`演算子とは `Try`トレイトのシンタックスシュガーとして生まれたようです。
+もう一段だけ深ぼってみる (2)
 
-ここで、本家Rustコンパイラのソースコードを覗いてみてみようと思います。
+では、この ? 演算子の実装はどこに書かれているのでしょうか。
 
-色々探した結果、`?`演算子とは `Try`トレイトのシンタックスシュガーと記述されている箇所はこの辺りのようです。
+調べていくと、Rustの RFC1859 に辿り着きます。
+
+https://rust-lang.github.io/rfcs/1859-try-trait.html
+
+この RFC では、? 演算子が Try トレイトを利用して実装されていることが説明されています。
+
+つまり ? 演算子は
+
+Try トレイトのシンタックスシュガー
+
+として設計されています。
+
+Rustコンパイラのコードを見てみると、? 演算子がデシュガリング（構文変換）されることを示す箇所があります。
 
 https://doc.rust-lang.org/beta/nightly-rustc/src/rustc_hir/hir.rs.html#3018
 
@@ -151,13 +197,13 @@ impl MatchSource {
 }
 ```
 
-いやー難しいですね。
+ここでは TryDesugar という名前で、? 演算子が構文変換されることが示されています。
 
-## もう一段だけ負荷ぼってみる(2)
+## もう一段だけ深ぼってみる (3)
 
-ちなみに、`?`演算子が生まれる以前は、`try!` マクロがその立場にあったようです。
+ちなみに、`?`演算子が導入される以前は `try!`マクロが使われていました。
 
-`try!` マクロの宣言はここにありました。
+その定義は次のようになっています。
 
 https://doc.rust-lang.org/src/core/macros/mod.rs.html#506
 
@@ -178,13 +224,22 @@ macro_rules! r#try {
 }
 ```
 
-たしかに、`std::result::Result::Ok(val)` なら `val` を返しているし、
+このコードを見ると
 
-`std::result::Result::Err(err)` なら `return err(From::from(err))` してるのが分かりますね。
+- Ok(val) の場合 → val を返す
+- Err(err) の場合 → return Err(From::from(err))
+
+という処理をしていることが分かります。
+
+つまり現在の ? 演算子とほぼ同じ挙動をしています。
 
 ## 振り返り
 
 今回は `anyhow` クレートを改めて足を止めて見てみました。
+
+また、その途中で ? 演算子の仕組みについても少し深掘りしてみました。
+
+普段は何気なく使っている機能ですが、こうしてソースコードや RFC を辿ってみると、Rustの設計がよく考えられていることが分かります。
 
 これで明日から、もっと堂々と `anyhow` を使っていけるぞー 🙌
 
