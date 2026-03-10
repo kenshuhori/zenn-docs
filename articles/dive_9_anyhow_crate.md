@@ -18,8 +18,6 @@ publication_name: doctormate
 
 `anyhow` は一方で、エラーへの変換を容易にしたりと、簡潔で柔軟な管理ができます。
 
-`thiserror` も `anyhow` も、内部的に `std::error::Error` トレイトを扱うという点で共通し、そのおかげでこれら2つのクレートの親和性も高いはずです。
-
 今回はそんな `anyhow` クレートに改めて足を止めて見てみます。
 
 
@@ -88,7 +86,15 @@ std::result::Result<String, anyhow::Error>
 
 つまり `anyhow::Result<T>` は `Result<T, anyhow::Error>` を簡潔に書くための型エイリアスになっています。
 
-`anyhow!` マクロは、`anyhow::Error` 型を生成します。
+これは [anyhow の Docs.rs](https://docs.rs/anyhow/latest/anyhow/type.Result.html) の冒頭にも記載があります。
+
+```rust
+pub type Result<T, E = Error> = Result<T, E>;
+```
+
+左辺の `Result` は `std::result::Result` で、`E=Error` は `anyhow::Error` で、指定がなければ `anyhow::Error` になるというわけですね。
+
+また `anyhow!` マクロは、`anyhow::Error` 型を生成します。
 
 これにより、`read_file_ext` は、成功時はテキスト（`String`）、失敗時はanyhowエラー（`anyhow::Error`）を返す関数になっており、成立していることがわかります。
 
@@ -143,7 +149,11 @@ https://doc.rust-jp.rs/book-ja/ch09-02-recoverable-errors-with-result.html
 
 今回は `anyhow` クレートを改めて足を止めて見てみました。
 
-`std::error::Error` トレイトを通じて、?演算子による変換が柔軟に行えることが理解できました。
+`anyhow::Error` は `std::error::Error` トレイトを実装するものであれば何でも扱えるという点によって、
+
+?演算子による変換が簡単に行えるんだな、という理解ができました。
+
+`std::error::Error` との関係性は掴めたので、次は `thiserror` との組み合わせなども見ていきたいと思います。
 
 これで明日から、もっと堂々と `anyhow` を使っていけるぞー 🙌
 
