@@ -138,7 +138,7 @@ https://doc.rust-jp.rs/book-ja/ch09-02-recoverable-errors-with-result.html
 
 ?演算子はこの場合、エラー時は `std::io::Error` を `anyhow::Error` に変換してreturnできる必要があります。
 
-`anyhow::Error` は `std::error::Error` トレイトを実装した型をトレイト境界にて指定しています。
+`anyhow::Error` は `std::error::Error` トレイトを実装した型であれば何でも扱える構造になっています。
 
 また `std::io::Error` は `std::error::Error` トレイトを実装したものです。
 
