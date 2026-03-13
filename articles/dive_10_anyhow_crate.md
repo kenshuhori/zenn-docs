@@ -14,16 +14,11 @@ publication_name: doctormate
 
 [前回](https://zenn.dev/doctormate/articles/dive_9_anyhow_crate)の記事では `anyhow` の基本的な使用方法を見てきました。
 
-今回は `anyhow` クレートを足を止めて見てみます。
+今回は `anyhow` クレートを利用する際に必ず利用する `?`演算子（question mark operator）を深掘りするために、足を止めて見てみます。
 
+## ?演算子の振る舞いを再確認してみる
 
-## もう一段だけ深ぼってみる (1)
-
-さて、ここで改めて ? 演算子について考えてみます。
-
-すっかり使い慣れた `?`演算子（question mark operator）ですが、これってそもそも何なのでしょうか？
-
-以下のコードを少し分解してみます。
+改めて、前回扱った以下のコードを確認してみます。
 
 ```rust
 fn main() {
@@ -43,9 +38,7 @@ fn read_file() -> std::result::Result<String, std::io::Error> {
 }
 ```
 
-ここでは `read_file()?` という形で ? 演算子を使っています。
-
-これは概念的には次のような処理になります。
+ここで `read_file()?` という形で ? 演算子を使っており、概念的には次のような処理になります。
 
 ```rust
 match read_file() {
@@ -59,14 +52,18 @@ match read_file() {
 - Ok の場合 → 中身を取り出す
 - Err の場合 → return Err(...) する
 
-という処理を簡潔に書くための構文です。
+という処理を簡潔に書くための構文であることを前回確認しました。
 
-この挙動は、TRPL（The Rust Programming Language）の
-「9.2 Resultで回復可能なエラー」でも説明されています。
+また `anyhow::error::Error` では `std::error::Error` トレイトを実装した型 `E` に対する `std::convert::From` が実装されています。
 
-https://doc.rust-jp.rs/book-ja/ch09-02-recoverable-errors-with-result.html
+https://docs.rs/anyhow/latest/anyhow/struct.Error.html#impl-From%3CE%3E-for-Error
 
-もう一段だけ深ぼってみる (2)
+`std::io::Error` はそもそも `std::error::Error` を実装したものです。
+
+これにより `?`演算子を使うだけで `std::result::Result<String, std::io::Error>` が `anyhow::Result<String>` に変換される仕組みがわかりました。
+
+
+## もう一段だけ深ぼってみる (1)
 
 では、この ? 演算子の実装はどこに書かれているのでしょうか。
 
@@ -74,9 +71,7 @@ https://doc.rust-jp.rs/book-ja/ch09-02-recoverable-errors-with-result.html
 
 https://rust-lang.github.io/rfcs/1859-try-trait.html
 
-この RFC では、? 演算子が Try トレイトを利用して実装されていることが説明されています。
-
-つまり ? 演算子は `Try トレイトのシンタックスシュガー` として設計されています。
+この RFC では `?`演算子は `Try トレイトのシンタックスシュガー` として設計されていることが説明されています。
 
 Rustコンパイラのコードを見てみると、? 演算子がデシュガリング（構文変換）されることを示す箇所があります。
 
@@ -115,9 +110,9 @@ impl MatchSource {
 }
 ```
 
-ここでは TryDesugar という名前で、? 演算子が構文変換されることが示されています。
+ここでは `TryDesugar` という名前で、`?`演算子が構文変換されることが示されています。
 
-## もう一段だけ深ぼってみる (3)
+## もう一段だけ深ぼってみる (2)
 
 ちなみに、`?`演算子が導入される以前は `try!`マクロが使われていました。
 
@@ -149,7 +144,7 @@ macro_rules! r#try {
 
 という処理をしていることが分かります。
 
-つまり現在の ? 演算子とほぼ同じ挙動をしています。
+つまり現在の ? 演算子と同じ挙動をしています。
 
 ## 振り返り
 
