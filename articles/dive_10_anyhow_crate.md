@@ -1,5 +1,5 @@
 ---
-title: "足を止めて見る #10 〜 Rustのanyhowクレート(2) 〜"
+title: "足を止めて見る #10 〜 ?演算子の正体 〜"
 emoji: "🚶"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["rust"]
@@ -15,6 +15,13 @@ publication_name: doctormate
 [前回](https://zenn.dev/doctormate/articles/dive_9_anyhow_crate)の記事では `anyhow` の基本的な使用方法を見てきました。
 
 今回は `anyhow` クレートを利用する際に必ず利用する `?`演算子（question mark operator）を深掘りするために、足を止めて見てみます。
+
+## ?演算子の正体は？
+
+```
+?演算子は Result 専用の構文ではなく、
+「失敗したら早期 return する」というパターンを抽象化した構文です。
+```
 
 ## ?演算子の振る舞いを再確認してみる
 
@@ -146,7 +153,7 @@ macro_rules! r#try {
 
 つまり現在の ? 演算子と同じ挙動をしています。
 
-## ## もう一段だけ深ぼってみる (3)
+## もう一段だけ深ぼってみる (3)
 
 似た話で `try_opt!` マクロという存在があります。
 
