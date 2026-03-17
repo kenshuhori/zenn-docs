@@ -75,7 +75,7 @@ https://docs.rs/anyhow/latest/anyhow/struct.Error.html#impl-From%3CE%3E-for-Erro
 
 そのため `std::result::Result<String, std::io::Error>` が `anyhow::Result<String>` へ 
 
-?演算子を使うだけで変換されるというカラクリであることが分かりました。
+?演算子を使うだけで変換されるカラクリだと分かりました。
 
 
 ## もう一段だけ深ぼってみる (1)
@@ -129,7 +129,7 @@ impl MatchSource {
 
 ## もう一段だけ深ぼってみる (2)
 
-ちなみに、?演算子が導入される以前は `try!`マクロが使われていたようです。
+では、その `try!` マクロとはどういったものなのでしょうか？
 
 その定義は次のようになっています。
 
