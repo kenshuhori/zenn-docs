@@ -14,11 +14,11 @@ publication_name: doctormate
 
 [前回](https://zenn.dev/doctormate/articles/dive_9_anyhow_crate)の記事では `anyhow` の基本的な使用方法を見てきました。
 
-今回は `anyhow` クレートを利用する際に必ず利用するであろう `?`演算子（question mark operator）を、足を止めて深掘りしようと思います。
+今回は `anyhow` クレートを利用する際に必ず利用するであろう ?演算子（question mark operator）を、足を止めて深掘りしようと思います。
 
 ## ?演算子の正体は？
 
-まず `?`演算子 についての結論です（ChatGPT作）
+まず結論から、 ?演算子 とは以下です。
 
 ```
 ?演算子は Result 専用の構文ではなく、
@@ -29,7 +29,7 @@ publication_name: doctormate
 
 ## ?演算子の振る舞いを再確認してみる
 
-改めて、前回扱った以下のコードを確認してみます。
+改めて、[前回](https://zenn.dev/doctormate/articles/dive_9_anyhow_crate)扱った以下のコードを確認してみます。
 
 ```rust
 fn main() {
@@ -52,9 +52,12 @@ fn read_file() -> std::result::Result<String, std::io::Error> {
 ここで `read_file()?` という形で ? 演算子を使っており、概念的には次のような処理になります。
 
 ```rust
-match read_file() {
-    Ok(v) => v,
-    Err(e) => return Err(From::from(e)),
+fn read_file_ext() -> anyhow::Result<String> {
+    let file = match read_file() {
+        Ok(v) => v,
+        Err(e) => return Err(From::from(e)),
+    }
+    Ok(file)
 }
 ```
 
@@ -71,20 +74,20 @@ https://docs.rs/anyhow/latest/anyhow/struct.Error.html#impl-From%3CE%3E-for-Erro
 
 `std::io::Error` はそもそも `std::error::Error` を実装したものです。
 
-これにより `?`演算子を使うだけで `std::result::Result<String, std::io::Error>` が `anyhow::Result<String>` に変換される仕組みがわかりました。
+そのため `std::result::Result<String, std::io::Error>` が `anyhow::Result<String>` へ ? 演算子を使うだけで変換されるというカラクリであることが分かりました。
 
 
 ## もう一段だけ深ぼってみる (1)
 
-では、この ? 演算子の実装はどこに書かれているのでしょうか。
+では、この ?演算子の実装はどこに書かれているのでしょうか。
 
 調べていくと、Rustの RFC1859 に辿り着きます。
 
 https://rust-lang.github.io/rfcs/1859-try-trait.html
 
-この RFC では `?`演算子は `Try トレイトのシンタックスシュガー` として設計されていることが説明されています。
+この RFC では ?演算子は `Try トレイトのシンタックスシュガー` として設計されていることが説明されています。
 
-Rustコンパイラのコードを見てみると、? 演算子がデシュガリング（構文変換）されることを示す箇所があります。
+Rustコンパイラのコードを見てみると、?演算子がデシュガリング（構文変換）されることを示す箇所があります。
 
 https://doc.rust-lang.org/beta/nightly-rustc/src/rustc_hir/hir.rs.html#3018
 
@@ -121,11 +124,11 @@ impl MatchSource {
 }
 ```
 
-ここでは `TryDesugar` という名前で、`?`演算子が構文変換されることが示されています。
+ここでは `TryDesugar` という名前で、?演算子が構文変換されることが示されています。
 
 ## もう一段だけ深ぼってみる (2)
 
-ちなみに、`?`演算子が導入される以前は `try!`マクロが使われていました。
+ちなみに、?演算子が導入される以前は `try!`マクロが使われていました。
 
 その定義は次のようになっています。
 
@@ -134,7 +137,7 @@ https://doc.rust-lang.org/src/core/macros/mod.rs.html#506
 ```rust
 #[macro_export]
 #[stable(feature = "rust1", since = "1.0.0")]
-#[deprecated(since = "1.39.0", note = "use the `?` operator instead")]
+#[deprecated(since = "1.39.0", note = "use the ? operator instead")]
 #[doc(alias = "?")]
 macro_rules! r#try {
     ($expr:expr $(,)?) => {
@@ -155,7 +158,7 @@ macro_rules! r#try {
 
 という処理をしていることが分かります。
 
-つまり現在の ? 演算子と同じ挙動をしています。
+つまり現在の ?演算子と同じ挙動をしています。
 
 ## もう一段だけ深ぼってみる (3)
 
@@ -163,7 +166,7 @@ macro_rules! r#try {
 
 https://docs.rs/try_opt/latest/try_opt/macro.try_opt.html
 
-現在は Deprecated になっており、`?`演算子を利用せよとなっています。
+現在は Deprecated になっており、?演算子を利用せよとなっています。
 
 じゃあ `try!` マクロと `try_opt!` マクロの違いは何なのでしょうか？
 
@@ -175,7 +178,7 @@ https://docs.rs/try_opt/latest/try_opt/macro.try_opt.html
 
 今回は `anyhow` クレートを改めて足を止めて見てみました。
 
-また、その途中で ? 演算子の仕組みについても少し深掘りしてみました。
+また、その途中で ?演算子の仕組みについても少し深掘りしてみました。
 
 普段は何気なく使っている機能ですが、こうしてソースコードや RFC を辿ってみると、Rustの設計がよく考えられていることが分かります。
 
