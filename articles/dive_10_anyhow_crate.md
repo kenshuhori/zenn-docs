@@ -21,8 +21,7 @@ publication_name: doctormate
 まず結論から、 ?演算子 とは以下です。
 
 ```
-?演算子は Result 専用の構文ではなく、
-「失敗したら早期 return する」というパターンを抽象化した構文です。
+「失敗したら早期 return する」というパターンを抽象化した構文
 ```
 
 これがどういう意味なのか、順を追って見ていきます。
@@ -81,9 +80,9 @@ https://docs.rs/anyhow/latest/anyhow/struct.Error.html#impl-From%3CE%3E-for-Erro
 
 では、この ?演算子の実装はどこに書かれているのでしょうか。
 
-調べていくと、Rustの RFC1859 に辿り着きます。
+調べていくと、Rustの RFC0243 に辿り着きます。
 
-https://rust-lang.github.io/rfcs/1859-try-trait.html
+https://rust-lang.github.io/rfcs/0243-trait-based-exception-handling.html
 
 この RFC では ?演算子は `Try トレイトのシンタックスシュガー` として設計されていることが説明されています。
 
@@ -128,7 +127,7 @@ impl MatchSource {
 
 ## もう一段だけ深ぼってみる (2)
 
-ちなみに、?演算子が導入される以前は `try!`マクロが使われていました。
+ちなみに、?演算子が導入される以前は `try!`マクロが使われていたようです。
 
 その定義は次のようになっています。
 
@@ -160,32 +159,98 @@ macro_rules! r#try {
 
 つまり現在の ?演算子と同じ挙動をしています。
 
+ためしに、?演算子の代わりに `try!` マクロを使ってみます。
+
+```rust
+pub(crate) fn main() {
+    match read_file_ext() {
+        Ok(_) => println!("成功"),
+        Err(e) => println!("エラー: {e}"),
+    }
+}
+
+fn read_file_ext() -> anyhow::Result<String> {
+    #[warn(deprecated)]
+    let text = r#try!(read_file());
+    Ok(text)
+}
+
+fn read_file() -> std::result::Result<String, std::io::Error> {
+    std::fs::read_to_string("not_found.txt")
+}
+```
+
+「try!マクロはdeprecatedですよ」というwarningは出ますが、?演算子を置き換えて機能しました。
+
 ## もう一段だけ深ぼってみる (3)
 
 似た話で `try_opt!` マクロという存在があります。
 
 https://docs.rs/try_opt/latest/try_opt/macro.try_opt.html
 
-現在は Deprecated になっており、?演算子を利用せよとなっています。
+こちらも現在は deprecated になっており、?演算子を利用せよとなっています。
 
 じゃあ `try!` マクロと `try_opt!` マクロの違いは何なのでしょうか？
 
-`try!`マクロは Result型 に対するもので `std` に含まれています。
+`try!`マクロは `Result` 型 に対するもので `std` に含まれています。
 
 対して `try_opt!` マクロは `Option` 型に対するもので `std` には含まれておらず、あくまでコミュニティによる `try_opt` クレートによる提供です。
 
+`try_opt!` マクロのソースコードを見てみましょう。
+
+https://docs.rs/try_opt/latest/src/try_opt/lib.rs.html#31-38
+
+```rust
+#[deprecated(since = "0.2.0", note = "Use the question mark (?) operator in newer versions of Rust.")]
+macro_rules! try_opt {
+    ($e:expr) =>(
+        match $e {
+            Some(v) => v,
+            None => return None,
+        }
+    )
+}
+```
+
+このコードを見ると
+
+- Some(val) の場合 → val を返す
+- None の場合 → return None
+
+という処理をしていることが分かり、現在の ?演算子と同じ挙動をしています。
+
+つまり `try_opt!` マクロは `try!` マクロを参考に、
+
+「`None`なら早期にreturnしたい」という願いを叶えるために考案されたものなんだなあ、ということが分かってきます。
+
+## もう一段だけ深ぼってみる (4)
+
+そしてさらに Rustの RFC1859 にて、
+
+「?演算子をResult専用から“任意の型に拡張する仕組み”を導入しませんか？」
+
+と展開され、?をOptionでも使えるようになっていったわけです。
+
+https://rust-lang.github.io/rfcs/1859-try-trait.html
+
+そのため、現在 `?` 演算子は Option型でも Result型でも、同じように利用できているわけですねー。
+
 ## 振り返り
 
-今回は `anyhow` クレートを改めて足を止めて見てみました。
+今回は ?演算子に足を止めて見てみました。
 
-また、その途中で ?演算子の仕組みについても少し深掘りしてみました。
+普段は何気なく使っている?演算子ですが、こうしてソースコードや RFC を辿ってみると、Rustの設計や歴史的背景を感じられます。
 
-普段は何気なく使っている機能ですが、こうしてソースコードや RFC を辿ってみると、Rustの設計がよく考えられていることが分かります。
+冒頭の結論に戻りますが、?演算子とは
 
-これで明日から、もっと堂々と `anyhow` を使っていけるぞー 🙌
+```
+「失敗したら早期 return する」というパターンを抽象化した構文
+```
+
+です。今ならスッと意味が分かりますね、これで明日から、もっと堂々と `anyhow` を使っていけるぞー 🙌
 
 ## その他
 
 今回書いたRustのコードはこのリポジトリで制作しています。
 
-https://github.com/kenshuhori/rust/tree/main/workspace/dive_9_anyhow_crate
+https://github.com/kenshuhori/rust/tree/main/workspace/dive_10_anyhow_crate
