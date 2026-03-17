@@ -84,7 +84,7 @@ https://docs.rs/anyhow/latest/anyhow/struct.Error.html#impl-From%3CE%3E-for-Erro
 
 https://rust-lang.github.io/rfcs/0243-trait-based-exception-handling.html
 
-この RFC では ?演算子は `Try トレイトのシンタックスシュガー` として設計されていることが説明されています。
+RFC243では、?演算子は `try!` マクロの糖衣構文として導入されました。
 
 Rustコンパイラのコードを見てみると、?演算子がデシュガリング（構文変換）されることを示す箇所があります。
 
