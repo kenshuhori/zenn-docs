@@ -73,7 +73,9 @@ https://docs.rs/anyhow/latest/anyhow/struct.Error.html#impl-From%3CE%3E-for-Erro
 
 `std::io::Error` はそもそも `std::error::Error` を実装したものです。
 
-そのため `std::result::Result<String, std::io::Error>` が `anyhow::Result<String>` へ ? 演算子を使うだけで変換されるというカラクリであることが分かりました。
+そのため `std::result::Result<String, std::io::Error>` が `anyhow::Result<String>` へ 
+
+?演算子を使うだけで変換されるというカラクリであることが分かりました。
 
 
 ## もう一段だけ深ぼってみる (1)
@@ -214,7 +216,7 @@ macro_rules! try_opt {
 
 このコードを見ると
 
-- Some(val) の場合 → val を返す
+- Some(v) の場合 → v を返す
 - None の場合 → return None
 
 という処理をしていることが分かり、現在の ?演算子と同じ挙動をしています。
