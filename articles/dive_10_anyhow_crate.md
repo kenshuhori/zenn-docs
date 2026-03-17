@@ -229,7 +229,7 @@ macro_rules! try_opt {
 
 「?演算子をResult専用から“任意の型に拡張する仕組み”を導入しませんか？」
 
-と展開され、?をOptionでも使えるようになっていったわけです。
+と展開され、?演算子をOptionでも使えるようになっていったわけです。
 
 https://rust-lang.github.io/rfcs/1859-try-trait.html
 
