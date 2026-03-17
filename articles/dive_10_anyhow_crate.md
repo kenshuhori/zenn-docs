@@ -14,7 +14,7 @@ publication_name: doctormate
 
 [前回](https://zenn.dev/doctormate/articles/dive_9_anyhow_crate)の記事では `anyhow` の基本的な使用方法を見てきました。
 
-今回は `anyhow` クレートを利用する際に必ず利用する `?`演算子（question mark operator）を、足を止めて深掘りしようと思います。
+今回は `anyhow` クレートを利用する際に必ず利用するであろう `?`演算子（question mark operator）を、足を止めて深掘りしようと思います。
 
 ## ?演算子の正体は？
 
