@@ -37,17 +37,17 @@ fn main () {
 
 fn read_file() -> anyhow::Result<String> {
     std::fs::read_to_string("nonexist.txt")
-        .context("設定ファイルの読み込みに失敗しました")
+        .context("ファイルの読み込みに失敗しました")
 }
 ```
 
-エラーが発生したときに `「設定ファイルの読み込みに失敗しました」` という情報が追加され、原因の特定がしやすくなります。
+エラーが発生したときに `「ファイルの読み込みに失敗しました」` という情報が追加され、原因の特定がしやすくなります。
 
 ```sh
 $ cargo run
 
 // 出力
-設定ファイルの読み込みに失敗しました
+ファイルの読み込みに失敗しました
 ```
 
 ### with_context
@@ -61,8 +61,8 @@ context の遅延評価版です。
 use anyhow::Context;
 
 fn read_file() -> anyhow::Result<String> {
-    fs::read_to_string("config.json")
-        .with_context(|| "設定ファイルの読み込みに失敗しました")
+    fs::read_to_string("nonexist.txt")
+        .with_context(|| "ファイルの読み込みに失敗しました")
 }
 ```
 
@@ -75,7 +75,7 @@ fn read_file() -> anyhow::Result<String> {
 $ cargo run
 
 // 出力
-設定ファイルの読み込みに失敗しました
+ファイルの読み込みに失敗しました
 ```
 
 ### anyhow! マクロ
@@ -84,8 +84,8 @@ $ cargo run
 
 ```rust
 fn read_file() -> anyhow::Result<String> {
-    std::fs::read_to_string("config.json")
-        .map_err(|e| anyhow::anyhow!("設定ファイルの読み込みに失敗しました: {}", e))
+    std::fs::read_to_string("nonexist.txt")
+        .map_err(|e| anyhow::anyhow!("ファイルの読み込みに失敗しました: {}", e))
 }
 ```
 
@@ -93,7 +93,7 @@ fn read_file() -> anyhow::Result<String> {
 $ cargo run
 
 // 出力
-設定ファイルの読み込みに失敗しました: No such file or directory (os error 2)
+ファイルの読み込みに失敗しました: No such file or directory (os error 2)
 ```
 
 ### bail! マクロ
@@ -102,10 +102,10 @@ $ cargo run
 
 ```rust
 fn read_file() -> anyhow::Result<(String)> {
-    let content = std::fs::read_to_string("config.json");
+    let content = std::fs::read_to_string("nonexist.txt");
     match content {
         Ok(content) => Ok(content),
-        Err(e) => anyhow::bail!("設定ファイルの読み込みに失敗しました: {}", e),
+        Err(e) => anyhow::bail!("ファイルの読み込みに失敗しました: {}", e),
     }
 }
 ```
@@ -116,7 +116,7 @@ fn read_file() -> anyhow::Result<(String)> {
 $ cargo run
 
 // 出力
-設定ファイルの読み込みに失敗しました: No such file or directory (os error 2)
+ファイルの読み込みに失敗しました: No such file or directory (os error 2)
 ```
 
 ### ensure! マクロ
@@ -125,8 +125,8 @@ $ cargo run
 
 ```rust
 fn read_file() -> anyhow::Result<(String)> {
-    let content = std::fs::read_to_string("config.json");
-    let result = anyhow::ensure!(content.is_ok(), "設定ファイルの読み込みに失敗しました: {:?}", content.err());
+    let content = std::fs::read_to_string("nonexist.txt");
+    let result = anyhow::ensure!(content.is_ok(), "ファイルの読み込みに失敗しました: {:?}", content.err());
     Ok(result)
 }
 ```
@@ -135,7 +135,7 @@ fn read_file() -> anyhow::Result<(String)> {
 $ cargo run
 
 // 出力
-設定ファイルの読み込みに失敗しました: Some(Os { code: 2, kind: NotFound, message: "No such file or directory" })
+ファイルの読み込みに失敗しました: Some(Os { code: 2, kind: NotFound, message: "No such file or directory" })
 ```
 
 ### downcast_ref / downcast
