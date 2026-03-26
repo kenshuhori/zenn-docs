@@ -84,8 +84,11 @@ $ cargo run
 
 ```rust
 fn read_file() -> anyhow::Result<String> {
-    std::fs::read_to_string("nonexist.txt")
-        .map_err(|e| anyhow::anyhow!("ファイルの読み込みに失敗しました: {}", e))
+    let content = std::fs::read_to_string("nonexist.txt");
+    match content {
+        Ok(content) => Ok(content),
+        Err(e) => Err(anyhow::anyhow!("ファイルの読み込みに失敗しました: {}", e)),
+    }
 }
 ```
 
