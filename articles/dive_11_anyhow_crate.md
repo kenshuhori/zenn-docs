@@ -28,10 +28,22 @@ publication_name: doctormate
 ```rust
 use anyhow::Context;
 
+fn main () {
+    match read_file() {
+        Ok(content) => println!("ファイルの内容: {}", content),
+        Err(e) => eprintln!("{}", e),
+    }
+}
+
 fn read_file() -> anyhow::Result<String> {
-    std::fs::read_to_string("config.json")
+    std::fs::read_to_string("nonexist.txt")
         .context("設定ファイルの読み込みに失敗しました")
 }
+```
+
+```sh
+$ cargo run --bin dive_11_anyhow_crate
+設定ファイルの読み込みに失敗しました
 ```
 
 エラーが発生したときに `「設定ファイルの読み込みに失敗しました」` という情報が追加され、原因の特定がしやすくなります。
