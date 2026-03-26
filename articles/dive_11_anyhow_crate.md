@@ -83,12 +83,17 @@ $ cargo run
 任意のエラーを簡単に生成できます。
 
 ```rust
-fn validate(x: i32) -> anyhow::Result<()> {
-    if x < 0 {
-        return Err(anyhow::anyhow!("x must be positive, got {}", x));
-    }
-    Ok(())
+fn read_file() -> anyhow::Result<String> {
+    std::fs::read_to_string("config.json")
+        .map_err(|e| anyhow::anyhow!("設定ファイルの読み込みに失敗しました: {}", e))
 }
+```
+
+```sh
+$ cargo run
+
+// 出力
+設定ファイルの読み込みに失敗しました: No such file or directory (os error 2)
 ```
 
 ### bail! マクロ
@@ -96,25 +101,41 @@ fn validate(x: i32) -> anyhow::Result<()> {
 エラーを生成して即座に return します。
 
 ```rust
-fn validate(x: i32) -> anyhow::Result<()> {
-    if x < 0 {
-        anhhow::bail!("x must be positive");
+fn read_file() -> anyhow::Result<(String)> {
+    let content = std::fs::read_to_string("config.json");
+    match content {
+        Ok(content) => Ok(content),
+        Err(e) => anyhow::bail!("設定ファイルの読み込みに失敗しました: {}", e),
     }
-    Ok(())
 }
 ```
 
 `return Err(anyhow!(...))` のショートハンドです。
+
+```sh
+$ cargo run
+
+// 出力
+設定ファイルの読み込みに失敗しました: No such file or directory (os error 2)
+```
 
 ### ensure! マクロ
 
 条件を満たさない場合にエラーを返します。
 
 ```rust
-fn validate(x: i32) -> anyhow::Result<()> {
-    anyhow::ensure!(x >= 0, "x must be positive");
-    Ok(())
+fn read_file() -> anyhow::Result<(String)> {
+    let content = std::fs::read_to_string("config.json");
+    let result = anyhow::ensure!(content.is_ok(), "設定ファイルの読み込みに失敗しました: {:?}", content.err());
+    Ok(result)
 }
+```
+
+```sh
+$ cargo run
+
+// 出力
+設定ファイルの読み込みに失敗しました: Some(Os { code: 2, kind: NotFound, message: "No such file or directory" })
 ```
 
 ### downcast_ref / downcast
