@@ -52,7 +52,7 @@ $ cargo run
 
 ### with_context
 
-context の遅延評価版です。
+こちらも、エラーに追加の文脈（コンテキスト）を付与するメソッドです。違いは、クロージャを渡すかどうかです。
 
 `with_context()` も [anyhow::Context トレイト](https://docs.rs/anyhow/latest/anyhow/trait.Context.html)によって提供されているため、
 使用するには `use anyhow::Context;` が必要になります。
@@ -66,8 +66,6 @@ fn read_file() -> anyhow::Result<String> {
 }
 ```
 
-違いは、クロージャを渡すかどうかです。
-
 クロージャに関しては [TRPL13章](https://doc.rust-jp.rs/book-ja/ch13-01-closures.html) が参考になります。ここでは触れずに先に進みます。
 
 
@@ -80,7 +78,7 @@ $ cargo run
 
 ### anyhow! マクロ
 
-任意のエラーを簡単に生成できます。
+型を気にせず、とりあえずエラーを作れる便利マクロです。
 
 ```rust
 fn read_file() -> anyhow::Result<String> {
@@ -92,6 +90,8 @@ fn read_file() -> anyhow::Result<String> {
 }
 ```
 
+`"ファイルの読み込みに失敗しました"` という文字列リテラルを `anyhow::Error` に包んでくれています。
+
 ```sh
 $ cargo run
 
@@ -101,7 +101,7 @@ $ cargo run
 
 ### bail! マクロ
 
-エラーを生成して即座に return します。
+エラーを生成して即座に return する便利マクロです。
 
 ```rust
 fn read_file() -> anyhow::Result<(String)> {
@@ -113,7 +113,7 @@ fn read_file() -> anyhow::Result<(String)> {
 }
 ```
 
-`return Err(anyhow!(...))` のショートハンドです。
+`return Err(anyhow!(...))` のショートハンドです。内部的に `anyhow!` でエラーを生成し、そのエラーを即座に返して関数を抜けるところまでやってくれるわけですね。
 
 ```sh
 $ cargo run
@@ -128,9 +128,12 @@ $ cargo run
 
 ```rust
 fn read_file() -> anyhow::Result<(String)> {
-    let content = std::fs::read_to_string("nonexist.txt");
-    let result = anyhow::ensure!(content.is_ok(), "ファイルの読み込みに失敗しました: {:?}", content.err());
-    Ok(result)
+    let content = std::fs::read_to_string("exist.txt")?;
+    anyhow::ensure!(
+        content.len() > 0,
+        "ファイルの中身が空です"
+    );
+    Ok(content)
 }
 ```
 
