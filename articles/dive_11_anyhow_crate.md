@@ -4,7 +4,7 @@ emoji: "🚶"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["rust"]
 published: false
-# published_at: 2026-03-18 12:00
+# published_at: 2026-03-31 17:00
 publication_name: doctormate
 ---
 
@@ -170,12 +170,15 @@ for cause in err.chain() {
 
 `source()` メソッドは [std::error::Errorトレイト](https://doc.rust-lang.org/std/error/trait.Error.html) が持つメソッドで、エラーの原因となる情報を提供するものです。
 
-[足を止めて見る#8 thiserror の source 属性](https://zenn.dev/doctormate/articles/dive_8_thiserror_crate)でも紹介していますが、`Option` を返すため、`chain()` は `None` が返るまで原因エラーを辿り続けてくれます。
+[足を止めて見る#8 thiserror の source 属性](https://zenn.dev/doctormate/articles/dive_8_thiserror_crate)でも紹介していますが、`Option` を返します。
 
-
-## もう一段だけ深ぼってみる
+したがって `chain()` は `source()` が `None` を返すまで繰り返し呼び出し、エラーの原因を順に辿ることができるメソッドと言えます。
 
 ## 振り返り
+
+`anyhow` が提供するメソッドやマクロを確認していきました。
+
+とくに便利マクロ `bail!` `anyhow!` `ensure!` は結構使い勝手がいいのではと思いました。
 
 これで明日から、もっと堂々と `anyhow` を使っていけるぞー 🙌
 
@@ -183,4 +186,4 @@ for cause in err.chain() {
 
 今回書いたRustのコードはこのリポジトリで制作しています。
 
-https://github.com/kenshuhori/rust/tree/main/workspace/dive_10_anyhow_crate
+https://github.com/kenshuhori/rust/tree/main/workspace/dive_11_anyhow_crate
