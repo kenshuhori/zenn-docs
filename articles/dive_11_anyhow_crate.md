@@ -113,7 +113,9 @@ fn read_file() -> anyhow::Result<(String)> {
 }
 ```
 
-`return Err(anyhow!(...))` のショートハンドです。内部的に `anyhow!` でエラーを生成し、そのエラーを即座に返して関数を抜けるところまでやってくれるわけですね。
+`return Err(anyhow!(...))` のショートハンドです。
+
+内部的に `anyhow!` でエラーを生成し、そのエラーを即座に返して関数を抜けるところまでやってくれるわけですね。
 
 ```sh
 $ cargo run
@@ -124,7 +126,7 @@ $ cargo run
 
 ### ensure! マクロ
 
-条件を満たさない場合にエラーを返します。
+条件を満たさない場合に、エラーを生成して即座に return する便利マクロです。
 
 ```rust
 fn read_file() -> anyhow::Result<(String)> {
@@ -134,6 +136,14 @@ fn read_file() -> anyhow::Result<(String)> {
         "ファイルの中身が空です"
     );
     Ok(content)
+}
+```
+
+振る舞いは bail! マクロとは似ており、実質は以下を表していると言えます。
+
+```rust
+if !(content.len() > 0) {
+    anyhow::bail!("error");
 }
 ```
 
