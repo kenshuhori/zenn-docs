@@ -154,20 +154,6 @@ $ cargo run
 ファイルの中身が空です
 ```
 
-### downcast_ref / downcast
-
-anyhow::Error の中身を具体的な型に戻すためのメソッドです。
-
-```rust
-if let Some(e) = err.downcast_ref::<std::io::Error>() {
-    println!("io error: {}", e);
-}
-```
-
-基本はあまり使いませんが、「どうしても型を見たいとき」に使います。
-
-バリデーション処理でかなり便利です。
-
 ### chain
 
 エラーの原因チェーンを辿ることができます。
@@ -178,7 +164,14 @@ for cause in err.chain() {
 }
 ```
 
-ログ出力やデバッグで役立ちます。
+基本はあまり使わないと思いますが、ログ出力やデバッグで役立ちます。
+
+`chain()` は内部的に `source()` を呼び出しています。
+
+`source()` メソッドは [std::error::Errorトレイト](https://doc.rust-lang.org/std/error/trait.Error.html) が持つメソッドで、エラーの原因となる情報を提供するものです。
+
+[足を止めて見る#8 thiserror の source 属性](https://zenn.dev/doctormate/articles/dive_8_thiserror_crate)でも紹介していますが、`Option` を返すため、`chain()` は `None` が返るまで原因エラーを辿り続けてくれます。
+
 
 ## もう一段だけ深ぼってみる
 
