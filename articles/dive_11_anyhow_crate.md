@@ -66,7 +66,7 @@ fn read_file() -> anyhow::Result<String> {
 }
 ```
 
-クロージャに関しては [TRPL13章](https://doc.rust-jp.rs/book-ja/ch13-01-closures.html) が参考になります。ここでは触れずに先に進みます。
+クロージャに関しては [TRPL13章](https://doc.rust-jp.rs/book-ja/ch13-01-closures.html) が参考になります。エラー時にのみ評価されるため、 `format!` や関数呼び出しを伴う場合は `with_context` を使う方が良いでしょう。
 
 
 ```sh
