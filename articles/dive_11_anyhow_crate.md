@@ -3,7 +3,7 @@ title: "足を止めて見る #11 〜 Rustのanyhowクレート(2) 〜"
 emoji: "🚶"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["rust"]
-published: false
+published: true
 # published_at: 2026-03-31 17:00
 publication_name: doctormate
 ---
@@ -104,7 +104,7 @@ $ cargo run
 エラーを生成して即座に return する便利マクロです。
 
 ```rust
-fn read_file() -> anyhow::Result<(String)> {
+fn read_file() -> anyhow::Result<String> {
     let content = std::fs::read_to_string("nonexist.txt");
     match content {
         Ok(content) => Ok(content),
