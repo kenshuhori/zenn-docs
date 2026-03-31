@@ -141,7 +141,7 @@ fn read_file() -> anyhow::Result<(String)> {
 $ cargo run
 
 // 出力
-ファイルの読み込みに失敗しました: Some(Os { code: 2, kind: NotFound, message: "No such file or directory" })
+ファイルの中身が空です
 ```
 
 ### downcast_ref / downcast
