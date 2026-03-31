@@ -4,7 +4,7 @@ emoji: "🚶"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["rust"]
 published: true
-# published_at: 2026-03-31 17:00
+published_at: 2026-03-31 17:00
 publication_name: doctormate
 ---
 
