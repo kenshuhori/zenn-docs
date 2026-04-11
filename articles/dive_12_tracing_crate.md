@@ -12,13 +12,25 @@ publication_name: doctormate
 
 足を止めて見ようシリーズの12つ目です。
 
-[前回](https://zenn.dev/doctormate/articles/dive_11_anyhow_crate)の記事では `anyhow` クレートが提供しているメソッドやマクロをを確認しました。
+[前回](https://zenn.dev/doctormate/articles/dive_11_anyhow_crate)の記事では `anyhow` クレートが提供しているメソッドやマクロを確認しました。
+
+今回は anyhow クレートを離れて tracing クレートに移っていこうと思います。
+
+もし Rust でアプリケーション書いていると `#[tracing::instrument]` といった記述を関数の宣言部分に付けていたりしませんか？
+
+これがあると、その関数名がログに書き込まれているのは、きっと観測していると思います。
+
+では `#[tracing::instrument]` と記述する以上のこと出来ていますか？
+
+自分は勿論できていません。なので足を止めて見ようと思います。
 
 ## tracing クレートとは
 
 とにかくまずは [docs.rs](https://docs.rs/) で `tracing` クレートを見に行きましょう。
 
 https://docs.rs/tracing/latest/tracing/
+
+
 
 ## tracing クレートをインストール
 
