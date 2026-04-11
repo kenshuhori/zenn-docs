@@ -37,7 +37,7 @@ https://docs.rs/tracing/latest/tracing/
 まずはインストールですね。
 
 ```console
-$ cargo add tracing
+$ cargo add tracing tracing-subscriber
 ```
 
 `Cargo.toml` に以下の依存関係が追加されました。
@@ -45,6 +45,7 @@ $ cargo add tracing
 ```toml
 [dependencies]
 tracing = "0.1.44"
+tracing-subscriber = "0.3.23"
 ```
 
 準備はたったこれだけですね
