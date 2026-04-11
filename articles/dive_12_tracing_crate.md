@@ -26,11 +26,29 @@ publication_name: doctormate
 
 ## tracing クレートとは
 
-とにかくまずは [docs.rs](https://docs.rs/) で `tracing` クレートを見に行きましょう。
+とにかくまずは基本のキ。[docs.rs](https://docs.rs/) で `tracing` クレートを見に行きます。
 
 https://docs.rs/tracing/latest/tracing/
 
+超ざっくりで以下のようなことが書いてあります。
 
+コア概念が3つ
+
+- Event
+    - 単発の出来事を表す概念
+    - ex. user_id=42 が login 処理をして 成功 した
+- Span
+    - 意味のある単位のまとまりを表す概念
+    - ex. 関数Aというまとまり、DBアクセスというまとまり
+- Subscriber
+    - Event や Span をどう扱うかを決めるもの
+    - ex. ファイルに書き出す、外部に送る
+
+つまり tracing は `とある文脈（Span）内で発生した出来事（Event）を購読者（Subscriber）に送りつける` みたいな動きをするようです。
+
+その中で、Event が構造化された形をとることができたり、Spanによって時系列や文脈を切り分けたりできるって感じみたいです。
+
+とはいえ、読んだだけではイマイチわからないので、簡単にでもハンズオンして見ようと思います。
 
 ## tracing クレートをインストール
 
