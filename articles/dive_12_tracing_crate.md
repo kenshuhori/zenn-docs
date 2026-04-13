@@ -87,27 +87,26 @@ fn main() {
     let span = span!(Level::INFO, "main");
     let _enter = span.enter();
     event!(Level::INFO, "inside span");
-    sub();
+    sub(42);
     event!(Level::INFO, "back in main span");
 }
 
-fn sub() {
-    let span = span!(Level::INFO, "sub");
+fn sub(user_id: u64) {
+    let span = span!(Level::INFO, "sub", user_id = user_id);
     let _enter = span.enter();
     event!(Level::WARN, "inside sub function");
     event!(Level::ERROR, "inside sub span");
 }
-
 ```
 
 実行するとこうなりました。
 
 ```.sh
-2026-04-13T12:27:46.616040Z  INFO dive_12_tracing_crate: hello, tracing!
-2026-04-13T12:27:46.616065Z  INFO main: dive_12_tracing_crate: inside span
-2026-04-13T12:27:46.616082Z  WARN main:sub: dive_12_tracing_crate: inside sub function
-2026-04-13T12:27:46.616092Z ERROR main:sub: dive_12_tracing_crate: inside sub span
-2026-04-13T12:27:46.616103Z  INFO main: dive_12_tracing_crate: back in main span
+2026-04-13T12:45:15.499469Z  INFO dive_12_tracing_crate: hello, tracing!
+2026-04-13T12:45:15.499500Z  INFO main: dive_12_tracing_crate: inside span
+2026-04-13T12:45:15.499517Z  WARN main:sub{user_id=42}: dive_12_tracing_crate: inside sub function
+2026-04-13T12:45:15.499529Z ERROR main:sub{user_id=42}: dive_12_tracing_crate: inside sub span
+2026-04-13T12:45:15.499538Z  INFO main: dive_12_tracing_crate: back in main span
 ```
 
 なるほど、つまり以下のような構造になるみたいです。
@@ -168,7 +167,14 @@ fn sub() {
 
 見比べてみてください、タイムスタンプを除いて完全一致です。
 
-つまり `#[instrument]` とは、その関数名で span を作って enter まで実行してくれてた！と気づけました。
+つまり手動で書いていた
+
+- span の生成
+- enter()
+
+といった処理を、`#[instrument]` が自動で行ってくれていることがわかります。
+
+さらに、呼び出し元の span（今回でいう main）を親として、その下にネストされる形で span が作られていることも確認できます。
 
 ## 振り返り
 
