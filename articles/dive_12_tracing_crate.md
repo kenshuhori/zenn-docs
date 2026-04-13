@@ -72,6 +72,31 @@ tracing自体では Subscriber は trait しか存在せず実装は提供して
 
 ## tracing クレートを使ってみる
 
+まずは最低限のコードを書いて、Event と Span がどう出力されるかを見てみます。
+
+tracing クレートは Event や Span を定義するための API を提供していますが、それだけでは何も表示されません。
+それらを受け取って出力してくれる Subscriber が必要です。
+
+今回は tracing-subscriber クレートが提供する実装を利用して、標準出力にログを出してみます。
+
+```rust
+use tracing::{info, info_span};
+use tracing_subscriber::fmt::Subscriber;
+
+fn main() {
+    let subscriber = Subscriber::new();
+    tracing::subscriber::set_global_default(subscriber)
+        .expect("failed to set global default subscriber");
+
+    info!("hello, tracing!");
+
+    let span = info_span!("main_span");
+    let _enter = span.enter();
+
+    info!("inside span");
+}
+```
+
 
 ## 振り返り
 
