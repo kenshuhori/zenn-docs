@@ -140,13 +140,13 @@ fn main() {
     let span = span!(Level::INFO, "main");
     let _enter = span.enter();
     event!(Level::INFO, "inside span");
-    sub();
+    sub(42);
     event!(Level::INFO, "back in main span");
 }
 
 #[instrument]
-fn sub() {
-    // let span = span!(Level::INFO, "sub");
+fn sub(user_id: u64) {
+    // let span = span!(Level::INFO, "sub", user_id = user_id);
     // let _enter = span.enter();
     event!(Level::WARN, "inside sub function");
     event!(Level::ERROR, "inside sub span");
@@ -158,11 +158,11 @@ fn sub() {
 実行するとこうなります。
 
 ```.sh
-2026-04-13T12:30:18.547126Z  INFO dive_12_tracing_crate: hello, tracing!
-2026-04-13T12:30:18.547153Z  INFO main: dive_12_tracing_crate: inside span
-2026-04-13T12:30:18.547170Z  WARN main:sub: dive_12_tracing_crate: inside sub function
-2026-04-13T12:30:18.547180Z ERROR main:sub: dive_12_tracing_crate: inside sub span
-2026-04-13T12:30:18.547191Z  INFO main: dive_12_tracing_crate: back in main span
+2026-04-13T12:46:09.636203Z  INFO dive_12_tracing_crate: hello, tracing!
+2026-04-13T12:46:09.636233Z  INFO main: dive_12_tracing_crate: inside span
+2026-04-13T12:46:09.636251Z  WARN main:sub{user_id=42}: dive_12_tracing_crate: inside sub function
+2026-04-13T12:46:09.636262Z ERROR main:sub{user_id=42}: dive_12_tracing_crate: inside sub span
+2026-04-13T12:46:09.636274Z  INFO main: dive_12_tracing_crate: back in main span
 ```
 
 見比べてみてください、タイムスタンプを除いて完全一致です。
