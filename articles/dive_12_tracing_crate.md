@@ -72,30 +72,55 @@ tracing自体では Subscriber は trait しか存在せず実装は提供して
 
 ## tracing クレートを使ってみる
 
-まずは最低限のコードを書いて、Event と Span がどう出力されるかを見てみます。
-
-tracing クレートは Event や Span を定義するための API を提供していますが、それだけでは何も表示されません。
-それらを受け取って出力してくれる Subscriber が必要です。
-
-今回は tracing-subscriber クレートが提供する実装を利用して、標準出力にログを出してみます。
+まずは最低限のコードを書いて、Event と Span が標準出力にどう出力されるかを見てみます。
 
 ```rust
-use tracing::{info, info_span};
-use tracing_subscriber::fmt::Subscriber;
+use tracing::{Level, event, span};
+use tracing_subscriber;
 
 fn main() {
-    let subscriber = Subscriber::new();
+    // subscriber を定義して設定
+    let subscriber = tracing_subscriber::fmt::Subscriber::new();
     tracing::subscriber::set_global_default(subscriber)
         .expect("failed to set global default subscriber");
 
-    info!("hello, tracing!");
-
-    let span = info_span!("main_span");
+    event!(Level::INFO, "hello, tracing!");
+    let span = span!(Level::INFO, "main_span");
     let _enter = span.enter();
+    event!(Level::INFO, "inside span");
+    sub();
+    event!(Level::INFO, "back in main span");
+}
 
-    info!("inside span");
+fn sub() {
+    event!(Level::WARN, "inside sub function");
+    let span = span!(Level::INFO, "sub_span");
+    let _enter = span.enter();
+    event!(Level::ERROR, "inside sub span");
 }
 ```
+
+実行するとこうなりました。
+
+```.sh
+2026-04-13T11:50:20.741433Z  INFO dive_12_tracing_crate: hello, tracing!
+2026-04-13T11:50:20.741463Z  INFO main_span: dive_12_tracing_crate: inside span
+2026-04-13T11:50:20.741476Z  WARN main_span: dive_12_tracing_crate: inside sub function
+2026-04-13T11:50:20.741485Z ERROR main_span:sub_span: dive_12_tracing_crate: inside sub span
+2026-04-13T11:50:20.741497Z  INFO main_span: dive_12_tracing_crate: back in main span
+```
+
+なるほど、つまり以下のような構造になるみたいです。
+
+```
+{タイムスタンプ} {Level} {span(1)名}:{span(2)名}:{span(n)名}: {クレート名}: {イベント}
+```
+
+span を enter すると、そのスコープでの event は、span に関連付けされるようですね。
+
+またさらに span を作って enter すると、span の中に span が作られるようです。
+
+なるほど、こうやって span をたとえば関数ごとに区切るなどして文脈を与えつつ、eventを記録していくという使い方ができるわけですね。
 
 
 ## 振り返り
