@@ -68,7 +68,7 @@ tracing自体では Subscriber は trait しか存在せず実装は提供して
 
 今回は、Subscriberの代表的な実装ライブラリ `tracing-subscriber` クレートもあわせて利用してみます。
 
-※ tracing も tracing-subscriber も、同じ tokio が開発しています。
+※ tracing も tracing-subscriber も、Tokio プロジェクトによって開発・メンテナンスされています。
 
 ## tracing クレートを使ってみる
 
