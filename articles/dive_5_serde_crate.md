@@ -99,7 +99,7 @@ fn main() {
 {
     "first_name": "太郎",
     "last_name": "田中",
-    "age": 30,
+    "age": { "value": 30 },
     "gender": "Male"
 }
 ```
