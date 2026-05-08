@@ -1,5 +1,5 @@
 ---
-title: "足を止めて見る #12 〜 Rustのtracingクレート 〜"
+title: "足を止めて見る #12 〜 Rustのtracingクレート(1) 〜"
 emoji: "🚶"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["rust"]
