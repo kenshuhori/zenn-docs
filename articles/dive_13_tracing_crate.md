@@ -18,6 +18,34 @@ publication_name: doctormate
 
 ## TODO: もう一段だけ深掘ってみる
 
+少し脱線になりますが `let _enter = span.enter()` の左辺 `_enter` は必要なのでしょうか？
+
+```rust
+fn main() {
+    let span = span!(Level::INFO, "main");
+    let _enter = span.enter();
+}
+```
+
+利用しない変数ならば `let _ = span.enter()` や、そもそも `span.enter()` と書いてしまう方が自然です。
+
+でも、この `_enter` は `_` と書いても省略してもダメなんです。なぜか。
+
+`span.enter()` は guard を返しているからです。
+
+「む... guard って... ？」
+
+guard とは、スコープを抜ける時に自動でメモリを解放する振る舞いを持った値を返すものを指します。
+
+つまり `Drop` を実装しているはずです。見てみます。
+
+`span.enter()` の返り値型は `span::Entered` です。こちらのドキュメントを見てみると...
+
+https://docs.rs/tracing/latest/tracing/span/struct.Entered.html
+
+`impl Drop for Entered<'_>` の記載がありますね。
+
+
 ## TODO: 振り返り
 
 ## その他
